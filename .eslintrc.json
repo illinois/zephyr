@@ -1,0 +1,16 @@
+{
+    "env": {
+        "node": true,
+        "es6": true,
+        "mocha": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
+    "rules": {
+        "handle-callback-err": "error",
+        "semi": ["error", "always"],
+        "no-console": "off"
+    }
+}
