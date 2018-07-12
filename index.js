@@ -1,5 +1,5 @@
 require('dotenv').load();
-const checkout = require('./checkout');
+const checkout = require('./src/checkout');
 
 const checkoutStudent = async () => {
   const checkoutPath = './zwang180';

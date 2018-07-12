@@ -7,7 +7,7 @@ const checkout = require('./checkout');
 const loadAssignmentConfig = require('./load-assignment-config');
 const gradeStudent = require('./grade-student');
 const computeScore = require('./compute-score');
-const slack = require('./slack-postUpdate.js');
+const slack = require('./slack');
 
 module.exports = async (options) => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);

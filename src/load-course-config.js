@@ -13,6 +13,10 @@ const schema = new SimpleSchema({
   'submissions': Object,
   'submissions.host': String,
   'submissions.org': String,
+  'grades': Object,
+  'grades.host': String,
+  'grades.org': String,
+  'grades.repo': String,
   'roster': [String],
 });
 

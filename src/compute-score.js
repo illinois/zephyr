@@ -1,4 +1,4 @@
-module.exports = function(result) {
+module.exports = (result) => {
   const score = {
     weight: 0,
     earned: 0,
@@ -7,7 +7,7 @@ module.exports = function(result) {
     errors: result.errors
   };
 
-  result.testCases.forEach(function (testCase) {
+  result.testCases.forEach((testCase) => {
     score.weight += testCase.weight;
     if (testCase.success) {
       score.earned += testCase.weight;
