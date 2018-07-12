@@ -11,6 +11,10 @@
     "rules": {
         "handle-callback-err": "error",
         "semi": ["error", "always"],
-        "no-console": "off"
+        "no-console": "off",
+        "prefer-const": "error",
+        "prefer-template": "error",
+        "no-var": "error",
+        "quotes": ["error", "single"]
     }
 }

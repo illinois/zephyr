@@ -1,5 +1,4 @@
 const fs = require('fs-extra');
-const path = require('path');
 const yaml = require('js-yaml');
 const SimpleSchema = require('simpl-schema').default;
 
@@ -29,5 +28,5 @@ module.exports = function() {
     schema.validate(config);
   }
 
-  return config
-}
+  return config;
+};
