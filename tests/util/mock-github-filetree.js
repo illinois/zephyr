@@ -1,4 +1,5 @@
 const { get: lodashGet } = require('lodash');
+const nodePath = require('path');
 
 const FILE = 'content';
 const DEFAULT_FILES = {
@@ -32,9 +33,10 @@ const makeDir = (path) => ({
   type: 'dir',
 });
 
-const getFileInfo = (files, path) => {
+const getFileInfo = (files, filePath) => {
   // Resolve "/" to the root, aka empty string
-  const objectPath = path === '/' ? '' : path.split('/').join('.');
+  const path = filePath === '/' ? '' : filePath;
+  const objectPath = path.split('/').join('.');
   const resolvedFile = get(files, objectPath);
   if (!resolvedFile) throw new Error(`File ${path} not found`);
   if (typeof resolvedFile === 'string') {
@@ -44,9 +46,9 @@ const getFileInfo = (files, path) => {
     return Object.keys(resolvedFile).map(name => {
       const f = resolvedFile[name];
       if (typeof f === 'string') {
-        return makeFile(`${path}/${name}`, f);
+        return makeFile(nodePath.join(path, name), f);
       } else {
-        return makeDir(`${path}/${name}`);
+        return makeDir(nodePath.join(path, name));
       }
     });
   }
