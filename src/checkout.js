@@ -2,10 +2,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const debug = require('debug')('zephyr:code-runner:fetchAssignment');
 const rp = require('request-promise-native');
-const Octokit = require('@octokit/rest');
+const Octokit = require('./octokit');
 const moment = require('moment');
-
-const host = 'https://github-dev.cs.illinois.edu/api/v3';
 
 const doDownload = async (downloadUrl, localSavePath) => {
   const body = await rp({ uri: downloadUrl, encoding: null });
@@ -71,18 +69,8 @@ const fetchTimestampedSha = async (timestamp, context) => {
 };
 
 module.exports = async ({ repoPath, checkoutPath, timestamp, ...options }) => {
-  const octokit = Octokit({
-    timeout: 5000,
-    baseUrl: options.host || host,
-  });
-
-  octokit.authenticate({
-    type: 'oauth',
-    token: process.env.GHE_TOKEN
-  });
-
   const fetchContext = {
-    octokit,
+    octokit: Octokit(),
     ...options,
   };
 
