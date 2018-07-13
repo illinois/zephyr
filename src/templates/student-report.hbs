@@ -1,0 +1,147 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Grade Feedback</title>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+    <style>
+    .pl-external-grader-results .panel-heading {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .pl-external-grader-results .panel-heading .panel-heading-left {
+      flex: 1;
+      align-self: left;
+    }
+
+    .pl-external-grader-results .panel-heading .panel-heading-right {
+      align-self: right;
+    }
+
+    .pl-external-grader-results .panel-heading .panel-heading-right .glyphicon.glyphicon-chevron-down {
+      transition: all 400ms;
+    }
+
+    .pl-external-grader-results .panel-heading:not(.collapsed) .panel-heading-right .glyphicon.glyphicon-chevron-down {
+      transform: rotateX(180deg);
+    }
+
+    .pl-external-grader-results pre.terminal-output {
+      background: black;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 200px;
+    }
+
+    .pl-external-grader-results pre.terminal-output > code {
+      color: white;
+      font-family: monospace;
+    }
+
+    .pl-external-grader-results pre.terminal-output.termial-output-question-panel {
+      margin: 0px;
+      border-radius: 0px;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="pl-external-grader-results">
+
+        {{#unless succeeded}}
+          <h3>Score:
+            <span style="color: hsla(211, 58%, 26%, 1)">
+              <strong>0%</strong>
+            </span>
+          </h3>
+
+          <h3>Unable to Grade :(</h3>
+          {{#if errors}}
+          <div class="panel-group">
+            <div class="panel panel-default">
+              <div class="panel-heading"><h4 class="panel-title">Errors</h4></div>
+              <ul>
+                {{#each errors}}
+                <li>{{this}}</li>
+                {{/each}}
+              </ul>
+              {{#if message}}
+              <pre class="terminal-output termial-output-question-panel"><code>{{message}}</code></pre>
+              {{/if}}
+            </div>
+          </div>
+          {{/if}}
+        {{/unless}}
+
+        {{#if succeeded}}
+          <h3>Score:
+            <span style="color: hsla(211, 58%, 26%, 1)">
+              <strong>{{points}}/{{max_points}} ({{score}}%)</strong>
+            </span>
+          </h3>
+
+          <h3>Test Results</h3>
+          {{#if testCases}}
+            {{#each testCases}}
+              <div class="panel panel-default">
+                <div class="panel-heading collapsed" data-toggle="collapse" data-target="#panel-{{@index}}" style="cursor: pointer;">
+                  <div class="panel-heading-left">
+                    <h4 class="panel-title">
+                      {{#if success}}
+                      <span class="glyphicon glyphicon-ok" aria-hidden="true" style="color: #4CAF50"></span>
+                      <span style="color: #4CAF50; margin-left: 5px;"><strong>[{{earned}}/{{weight}}]</strong></span>
+                      {{else}}
+                      <span class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #F44336"></span>
+                      <span style="color: #F44336; margin-left: 5px;"><strong>[{{earned}}/{{weight}}]</strong></span>
+                      {{/if}}
+                      <span style="margin-left: 5px;">{{name}}</span>
+                    </h4>
+                  </div>
+                  <div class="panel-heading-right">
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                  </div>
+                </div>
+                <div id="panel-{{@index}}" class="panel-collapse collapse">
+                  <ul class="list-group">
+                    {{#if description}}
+                      <li class="list-group-item"><strong>Description:</strong> {{description}}</li>
+                    {{/if}}
+                    <li class="list-group-item"><strong>Earned points:</strong> {{earned}}</li>
+                    <li class="list-group-item"><strong>Max points:</strong> {{weight}}</li>
+                    {{#if message}}
+                      <li class="list-group-item">
+                        <div><strong>Message</strong></div>
+                        <pre style="background: black; white-space: pre-wrap; overflow-y: auto; overflow-x: hidden; max-height: 200px"><code style="color: white; font-family: monospace;">{{message}}</code></pre>
+                      </li>
+                    {{/if}}
+                    {{#if output}}
+                      <li class="list-group-item">
+                        <div><strong>Output</strong></div>
+                        <pre style="background: black; white-space: pre-wrap; overflow-y: auto; overflow-x: hidden; max-height: 200px;"><code style="color: white; font-family: monospace;">{{output}}</code></pre>
+                      </li>
+                    {{/if}}
+                  </ul>
+                </div>
+              </div>
+            {{/each}}
+          {{else}}
+            <p>No detailed test results available.</p>
+          {{/if}}
+        {{/if}}
+      </div>
+      <hr>
+      <div class="text-muted">
+        Generated for <strong>{{netid}}</strong> using <strong>{{sha}}</strong> (from <strong>{{time}}</strong>)
+      </div>
+    </div>
+  </body>
+</html>

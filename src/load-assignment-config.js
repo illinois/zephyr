@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const yaml = require('js-yaml');
-const debug = require('debug')('zephyr:code-runner:loadConfig');
+const debug = require('debug')('zephyr:load-assignment-config');
 
 module.exports = async function(argv, assignmentPath) {
   // Load the assignment-specific YAML config:

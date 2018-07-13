@@ -10,7 +10,7 @@ const processCatchXML = require('./process-catch-xml.js');
  * - message
  */
 module.exports = function (results) {
-  if (!results) { return []; }
+  if (!results) return [];
 
   const testCases = [];
   const keys = Object.keys(results);

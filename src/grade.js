@@ -1,11 +1,12 @@
 const fs = require('fs-extra');
 const path = require('path');
 const tmp = require('tmp');
-const debug = require('debug')('zephyr:code-runner');
+const debug = require('debug')('zephyr:grade');
 
 const checkout = require('./checkout');
 const loadAssignmentConfig = require('./load-assignment-config');
 const gradeStudent = require('./grade-student');
+const processCatchResults = require('./process-catch-results');
 const computeScore = require('./compute-score');
 const slack = require('./slack');
 
@@ -26,7 +27,7 @@ module.exports = async (options) => {
       checkoutPath: assignmentDir,
       repoPath: options.assignment,
       org: 'cs225-staff',
-      repo: 'assignment',
+      repo: 'assignments',
     });
   }
 
@@ -40,7 +41,7 @@ module.exports = async (options) => {
   // Find the list of NetIDs to grade:
   let studentFolders;
   if (options.netid) {
-    console.log(`--netid used, using student: ${options.netid}`);
+    console.log(`Running for student: ${options.netid}`);
     studentFolders = [ options.netid ];
   } else {
     console.error('TODO: support student roster');
@@ -74,7 +75,8 @@ module.exports = async (options) => {
     }
 
     const result = await gradeStudent(options, assignmentConfig, netid);
-    result.testCases = require('../zephyr-catch-parser/process_catch.js')(result.grader_output);
+    result.testCases = processCatchResults(result.grader_output);
+    console.log(result);
 
     const outputFile = path.join(options.outputPath, `${netid}.json`);
     fs.writeFileSync(outputFile, JSON.stringify(result));

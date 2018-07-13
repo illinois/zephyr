@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "lint-fix": "eslint --fix ./"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "homepage": "https://github.com/nwalters512/zephyr#readme",
   "dependencies": {
     "@octokit/rest": "^15.9.4",
+    "chalk": "^2.4.1",
     "csv-stringify": "^3.1.1",
     "debug": "^3.1.0",
     "dotenv": "^6.0.0",
@@ -26,10 +28,13 @@
     "jest": "^23.4.0",
     "jest-plugin-fs": "^2.9.0",
     "js-yaml": "^3.12.0",
+    "lodash": "^4.17.10",
     "moment": "^2.22.2",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.5",
     "simpl-schema": "^1.5.0",
+    "validator": "^10.4.0",
+    "xml2js": "^0.4.19",
     "yargs": "^12.0.1"
   },
   "devDependencies": {

@@ -1,153 +1,168 @@
-const spawn = require('child_process').spawn;
+const fs = require('fs-extra');
+const path = require('path');
+const tmp = require('tmp');
+const spawnSync = require('child_process').spawnSync;
+const debug = require('debug')('zephyr:grade-student');
 
-// Wraps `spawn` in a Promise to allow us to use async/await
-// Based on https://github.com/expo/spawn-async/blob/master/src/spawnAsync.js
-// To simplify error handling, this promise will only ever resolve
-// Error cases are handled by attaching an `error` object to the result or
-// resolving with a non-zero status.
-// Copies a lot of behavior from spawnAsync, namely, output capturing and
-// timeouts. We need to do this async in order to keep the event loop free.
-const spawnAsync = async (...args) => {
-  const opts = (args.length >= 3) ? (args[2] || {}) : {};
-  const maxBuffer = opts.maxBuffer || 200 * 1024; // Default for spawnSync
-  const killSignal = opts.killSignal || 'SIGTERM'; // Default for spawnSync
+const checkout = require('./checkout');
+const slack = require('./slack');
 
-  return new Promise((resolve) => {
-    const child = spawn.apply(spawn, args);
-    const killChild = () => child.kill(killSignal);
-    let timeoutId = null;
-    if (opts.timeout) {
-      timeoutId = setTimeout(killChild, opts.timeout);
+const copyAllFilesInDir = (srcPath, destPath) => {
+  let allFilesSame = true;
+
+  debug(`Copying: ${srcPath}`);
+  fs.readdirSync(srcPath).forEach(function (fileName) {
+    const src = path.join(srcPath, fileName);
+    const dest = path.join(destPath, fileName);
+    let isSame;
+
+    if ( fs.lstatSync(src).isDirectory() ) {
+      fs.ensureDirSync(dest);
+      isSame = copyAllFilesInDir(src, dest);
+    } else {
+      debug(`--> Copying: ${src} => ${dest}`);
+
+      if (fs.existsSync(dest)) {
+        const src_str = fs.readFileSync(src, {encoding: 'utf8'}).replace(/[\n\r]/gm, '');
+        const dest_str = fs.readFileSync(dest, {encoding: 'utf8'}).replace(/[\n\r]/gm, '');
+
+        isSame = src_str == dest_str;
+
+        if (isSame) { debug(`SKIP: ${src} (file not changed)`); }
+        else        { debug(`NEW: ${src} (file changed)`); }
+      } else {
+        debug(`NEW: ${dest} (file did not exist)`);
+        isSame = false;
+      }
+
+      if (!isSame) { fs.copySync(src, dest); }
     }
-    let stdout = '';
-    let stderr = '';
-    child.stdout && child.stdout.on('data', (data) => {
-      stdout += data;
-      if (stdout.length > maxBuffer) killChild();
-    });
-    child.stderr && child.stderr.on('data', (data) => {
-      stderr += data;
-      if (stderr.length > maxBuffer) killChild();
-    });
-    child.on('close', (code, signal) => {
-      child.removeAllListeners();
-      if (timeoutId) clearTimeout(timeoutId);
-      resolve({ pid: child.pid, stdout, stderr, status: code, signal });
-    });
-    child.on('error', error => {
-      child.removeAllListeners();
-      if (timeoutId) clearTimeout(timeoutId);
-      resolve({ pid: child.pid, stdout, stderr, status: null, error });
-    });
+
+    if (!isSame) { allFilesSame = false; }
   });
+
+  return allFilesSame;
 };
 
-module.exports = async () => {
-  // == Command Line Args ==
-  // The first command line arg is the name of the `main` created by `make`.
-  // (Default: `test`)
-  let execCommand = 'test';
-  if (process.argv.length > 2) { execCommand = process.argv[2]; }
-  execCommand = `./${execCommand}`;
-
-
-  const results = [];
-  const recordResult = (testCase, p) => {
-    const result = {
-      exitCode: p.status,
-      signal: p.signal,
-      error: p.error,
-      name: testCase.name,
-      tags: testCase.tags,
-    };
-
-    try {
-      result.stdout = p.stdout.toString().substring(0, 10 * 1024);
-    } catch (e) {
-      result.stdout = '[Process timed out.]';
-    }
-
-    try {
-      result.stderr = p.stderr.toString().substring(0, 10 * 1024);
-    } catch (e) {
-      result.stderr = '[Process timed out.]';
-    }
-
-    results.push(result);
+/* runOneStudent */
+module.exports = async function (options, assignmentConfig, netid) {
+  //
+  // Create the result object:
+  //
+  const result = {
+    netid: netid,
+    timestamp: options.timestamp
   };
 
-  // Run `make`
-  const p = await spawnAsync('make', [execCommand], {});
-  recordResult({name: 'make', tags: {make: true}}, p);
 
-  // Only continue if `make` was successful
-  if (p.status === 0) {
-    // Ask `catch` to list all test cases and tags
-    const p = await spawnAsync(execCommand, ['--list-test-names-only']);
-    const catchListOutputLines = p.stdout.toString().split('\n');
-    catchListOutputLines.pop();  // Remove blank entry at end
+  //
+  // Create a temp folder to place all grader into:
+  //
+  const tempPathObj = tmp.dirSync({ unsafeCleanup: options.cleanup });
+  const tempPath = tempPathObj.name;
+  debug(`Using temp path for ${netid}: ${tempPath}`);
 
-    const testCases = [];
-    for (let i = 0; i < catchListOutputLines.length; i++) {
-      // Test case name:
-      const testCaseName = catchListOutputLines[i].trim().replace(/,/g, '\\,');
 
-      // Test case tags:
-      const p = await spawnAsync(execCommand, ['-t', testCaseName]);
-      const catchTagsOutputlines = p.stdout.toString().split('\n');
-
-      // Default tag values:
-      const testCaseTags = {
-        weight: 1,
-        timeout: 10000
-      };
-
-      catchTagsOutputlines.forEach(function (s) {
-        // Matches: "[tag=4]", "[valgrind]", etc
-        const tag_re = /\[((\w+)(=(\w+))?)\]/g;
-        let match;
-
-        while ((match = tag_re.exec(s))) {
-          // Capture the groups:
-          const tagName = match[2];
-          let tagValue = match[4];
-
-          // For tags without a value (eg: [valgrind]), default to true
-          if (tagValue === undefined) { tagValue = true; }
-
-          // Save the tag; store it as an int for "weight" and "timeout"
-          if (tagName == 'weight' || tagName == 'timeout') {
-            testCaseTags[tagName] = parseInt(tagValue);
-          } else {
-            testCaseTags[tagName] = tagValue;
-          }
-        }
-      });
-
-      // Add to list of test cases:
-      testCases.push({
-        name: testCaseName,
-        tags: testCaseTags
-      });
+  //
+  // Fetch student files (from git)
+  //
+  const temp_fetchStudentFiles = tmp.dirSync({ unsafeCleanup: true });
+  try {
+    const checkoutOptions = {
+      repoPath: assignmentConfig
     }
+    result.sha = await checkout(argv, assignmentConfig, netid, temp_fetchStudentFiles.name);
+  } catch (e) {
+    temp_fetchStudentFiles.removeCallback();
 
-    // Run the test cases
-    for (const testCase of testCases) {
-      const opts = {
-        timeout: testCase.tags.timeout,
-        maxBuffer: 1024 * 1024,
-        killSignal: 'SIGKILL'
-      };
-      let p = await spawnAsync(execCommand, ['-r', 'xml', testCase.name], opts);
+    if (argv.cleanup) { tempPathObj.removeCallback(); }
+    else { console.log(`No --cleanup, files remain at ${tempPath}`); }
 
-      // We'll only run valgrind if it's enabled and they passed the tests
-      if (testCase.tags.valgrind && !(p.status != 0 || p.signal || p.error)) {
-        // It's Valgrind time! Let's check for memory errors.
-        p = await spawnAsync('valgrind', ['--leak-check=full', '--error-exitcode=1', execCommand, '-r', 'xml', `"${testCase.name}"`], opts);
-      }
-      recordResult(testCase, p);
-    }
+    debug(`Failed to fetch files for ${netid}`, e);
+    result.success = false;
+    result.errors = [e.message];
+    return result;
   }
 
-  return results;
+
+  //
+  // Copy all files
+  //
+  // 1. Copy base files
+  assignmentConfig.baseFilePaths.forEach(function (folder) {
+    copyAllFilesInDir(folder, tempPath);
+  });
+
+  // 2. Add (overwriting base files, if needed) student files
+  copyAllFilesInDir(temp_fetchStudentFiles.name, tempPath);
+  temp_fetchStudentFiles.removeCallback();
+
+  // 3. Add required grader files for the autograder
+  assignmentConfig.autograderFilePaths.forEach(function (folder) {
+    copyAllFilesInDir(folder, tempPath);
+  });
+
+
+  //
+  // Run
+  //
+  debug(`GRADING STARTED : ${netid}`);
+  // This node process will compute its own timeout based on the timeout of
+  // all test cases
+  const p = spawnSync('node', assignmentConfig.autograderArgs, {
+    'cwd': tempPath,
+    'shell': true,
+    'stdio': ['pipe', 'pipe', 'pipe', 'pipe']
+  });
+  debug(`GRADING FINISHED : ${netid}`);
+
+  // Export files:
+  assignmentConfig.exportFiles.forEach(function (exportFileName) {
+    console.log(exportFileName);
+    const exportFilePath = path.join(tempPath, exportFileName);
+    let exportSavePath = path.join(argv.outputPath, 'export');
+    fs.ensureDirSync(exportSavePath);
+    exportSavePath = path.join(exportSavePath, `${netid}-${exportFileName}`);
+
+    if (fs.existsSync(exportFilePath)) {
+      fs.copyFileSync(exportFilePath, exportSavePath);
+      debug(`Exported file: ${exportSavePath}`);
+    }
+  });
+
+  // Capture output:
+  try {
+    const grader_output = JSON.parse(p.output[3].toString());
+    result.success = true;
+    result.grader_output = grader_output;
+  } catch (e) {
+    slack.warning(`Unable to capture grader result for ${netid}!`, JSON.stringify(e));
+    const logIfPresent = str => {
+      if (!str) return;
+      // Remove trailing newline since console.log adds one anyways
+      if (str[str.length - 1] === '\n') str = str.slice(0, -1);
+      console.log(str);
+    };
+    console.log('===BEGIN STDOUT===');
+    logIfPresent(p.output[1].toString());
+    console.log('===END STDOUT===');
+    console.log('===BEGIN STDERR===');
+    logIfPresent(p.output[2].toString());
+    console.log('===END STDERR===');
+    console.warn(`Unable to capture grader result for ${netid}!`);
+    console.warn(e);
+    result.success = false;
+    result.errors = ['Unable to capture grader output.'];
+
+    if (argv.cleanup) { tempPathObj.removeCallback(); }
+    else { console.log(`No --cleanup, files remain at ${tempPath}`); }
+
+    return result;
+  }
+
+
+
+  if (argv.cleanup) { tempPathObj.removeCallback(); }
+  else { console.log(`No --cleanup, files remain at ${tempPath}`); }
+  return result;
 };

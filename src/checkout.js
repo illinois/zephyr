@@ -1,18 +1,23 @@
 const fs = require('fs-extra');
 const path = require('path');
-const debug = require('debug')('zephyr:code-runner:fetchAssignment');
+const debug = require('debug')('zephyr:checkout');
 const rp = require('request-promise-native');
 const Octokit = require('./octokit');
 const moment = require('moment');
 
-const doDownload = async (downloadUrl, localSavePath) => {
+const doDownload = async (downloadUrl, checkoutPath) => {
   const body = await rp({ uri: downloadUrl, encoding: null });
-  fs.ensureDirSync(path.join(localSavePath, '..'));
-  fs.writeFileSync(localSavePath, body, {encoding: 'binary'});
-  debug(`Saved: ${  localSavePath}`);
+  fs.ensureDirSync(path.join(checkoutPath, '..'));
+  fs.writeFileSync(checkoutPath, body, {encoding: 'binary'});
+  debug(`Saved: ${checkoutPath}`);
 };
 
-const fetchDirectory = async (repoPath, localSavePath, context) => {
+// If the files list is empty, we always need this file/directory
+const needsFile = (path, files) => !files || files.some(f => f == path);
+const needsDirectory = (path, files) => !files || files.some(f => f.startsWith(path));
+
+const fetchDirectory = async (repoPath, checkoutPath, context) => {
+  const { files } = context;
   const res = await context.octokit.repos.getContent({
     owner: context.org,
     repo: context.repo,
@@ -21,24 +26,13 @@ const fetchDirectory = async (repoPath, localSavePath, context) => {
   });
 
   const promises = res.data.map(d => {
-    if (d.type == 'file' && d.size > 0) {
+    if (d.type == 'file' && d.size > 0 && needsFile(d.path, files)) {
       // standard file
-      return doDownload(d.download_url, path.join(localSavePath, d.name), );
+      return doDownload(d.download_url, path.join(checkoutPath, d.name), );
     } else if (d.type == 'file' && d.size == 0) {
-      // submodule
-      // - d.submodule_git_url
-      if (d.name == 'cs225') {
-        const newContext = {
-          ...context,
-          repo: 'libcs225'
-        };
-        return fetchDirectory('.', path.join(localSavePath, d.name), newContext);
-      } else {
-        fs.ensureDirSync(path.join(path.join(localSavePath, d.name), '..'));
-        fs.writeFileSync(path.join(localSavePath, d.name), '', {encoding: 'binary'});
-      }
-    } else if (d.type == 'dir') {
-      return fetchDirectory(d.path, path.join(localSavePath, d.name), context);
+      // submodule? ignore for now
+    } else if (d.type == 'dir' && needsDirectory(d.path, files)) {
+      return fetchDirectory(d.path, path.join(checkoutPath, d.name), context);
     } else {
       console.error(`Unknown git response: ${  d}`);
     }
@@ -68,20 +62,23 @@ const fetchTimestampedSha = async (timestamp, context) => {
   return commits.data[0].sha;
 };
 
-module.exports = async ({ repoPath, checkoutPath, timestamp, ...options }) => {
+module.exports = async ({ repoPath, files, checkoutPath, timestamp, ...options }) => {
   const fetchContext = {
     octokit: Octokit(),
+    // If files were specified, we need to transform them to be prefixed with the repo path
+    files: files.map(f => path.join(repoPath, f)),
     ...options,
   };
 
   if (timestamp) {
-    fetchContext.ref = await fetchTimestampedSha();
+    fetchContext.ref = await fetchTimestampedSha(timestamp, fetchContext);
   } else {
     // Even if a timestamp isn't specified, we should still pin all requests to
     // a specific commit so that we don't have a condition where someone
     // pushes code in the middle of a checkout process
-    fetchContext.ref = await fetchMasterSha();
+    fetchContext.ref = await fetchMasterSha(fetchContext);
   }
 
   await fetchDirectory(repoPath, checkoutPath, fetchContext);
+  return fetchContext.ref;
 };

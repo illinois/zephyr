@@ -1,6 +1,6 @@
 require('dotenv').load();
 const fs = require('fs-extra');
-const debug = require('debug')('zephyr');
+const debug = require('debug')('zephyr:cli');
 const path = require('path');
 const os = require('os');
 const grade = require('./grade');
@@ -66,9 +66,6 @@ const argv = require('yargs')
   .help()
   .argv;
 
-console.log(Object.keys(argv));
-process.exit(0);
-
 // Let's validate some stuff
 const fatal = (msg, exitCode = 1) => {
   console.error(msg);
@@ -133,16 +130,7 @@ fs.ensureDirSync(argv.outputPath);
 (async () => {
   const results = await grade(argv);
   await processResults(results, argv);
-})();
-
-
-
-console.log('Starting [code-runner]...');
-require('./zephyr-code-runner')(argv).then((results) => {
-  console.log('Starting [output-formatter]...');
-  require('./zephyr-output-formatter').processReportDictionary(argv, results).then(() => {
-    console.log('Done!');
-  });
-
-  console.log('Autograder complete!');
+})().catch(e => {
+  console.error(e);
+  process.exit(1);
 });

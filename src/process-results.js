@@ -3,17 +3,19 @@ const path = require('path');
 const moment = require('moment');
 const debug = require('debug')('zephyr:output-formatter');
 const handlebars = require('handlebars');
-const Octokit = require('octokit');
 
-const studentReportTemplate = handlebars.compile(fs.readFileSync('zephyr-output-formatter/templates/studentReport.hbs', 'utf8'));
+const octokit = require('./octokit')();
+const computeScore = require('./compute-score');
+const writeGradebook = require('./write-gradebook');
+const processCatch = require('./process-catch-results');
 
-const process_catch = require('../zephyr-catch-parser/process_catch.js');
+const studentReportTemplatePath = path.join(__dirname, 'templates', 'student-report.hbs');
+const studentReportTemplate = handlebars.compile(fs.readFileSync(studentReportTemplatePath, 'utf8'));
 
-
-const generateReport_HTML = exports.generateReport_HTML = function(result) {
+const generateReportHtml = exports.generateReportHtml = function(result) {
   // If there's any catch data, process it
   if (result.grader_output) {
-    result.testCases = process_catch(result.grader_output);
+    result.testCases = processCatch(result.grader_output);
   }
 
   //
@@ -58,7 +60,7 @@ module.exports = async function(argv, resultsDict) {
     const result = resultsDict[netid];
 
     const score = computeScore(result);
-    const html = generateReport_HTML(result);
+    const html = generateReportHtml(result);
 
     // Store file to disk
     debug(`Saving student report: ${  path.join( studentFeedbackDir, `${netid  }.html` )}`);
@@ -66,7 +68,7 @@ module.exports = async function(argv, resultsDict) {
 
     // Store file on git (graded runs)
     if (argv.graded) {
-      const res = await octokit.repos.createFile({
+      await octokit.repos.createFile({
         owner: org,
         repo: 'sp18-studentFeedback',
         path: path.join(argv.id, `${netid  }.html`),
