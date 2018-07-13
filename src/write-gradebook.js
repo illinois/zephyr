@@ -1,27 +1,23 @@
 const fs = require('fs-extra');
+const { promisify } = require('util');
 const path = require('path');
 const debug = require('debug')('zephyr:output-formatter');
 const octokit = require('./octokit');
+const csvStringify = promisify(require('csv-stringify'));
 
 module.exports = async function(gradebook, courseConfig, options) {
-  let csv = 'netid,score,error,ec\n';
+  const csvRows = [];
 
-  const keys = Object.keys(gradebook);
-  for (let i = 0; i < keys.length; i++) {
-    const netid = keys[i];
-    const score = gradebook[netid];
+  // Headers
+  csvRows.push(['netid', 'score', 'error', 'ec']);
 
-    csv += `${netid},${score.pct100},`;
+  Object.keys(gradebook).forEach(netid => {
+    const { pct100, errors, extraCredit } = gradebook[netid];
+    const joinedErrors = (errors || []).join(';');
+    csvRows.push([netid, pct100, joinedErrors, extraCredit]);
+  });
 
-    if (score.errors) {
-      csv += `"${score.errors.join(';').replace('"', '""')}",`;
-    } else {
-      csv += ',';
-    }
-
-    csv += score.extraCredit;
-    csv += '\n';
-  }
+  const csv = await csvStringify(csvRows);
 
   // Write file to disk
   debug(`Saving gradebook report: ${path.join(options.outputPath, `${options.id}.csv`)}`);
@@ -39,5 +35,4 @@ module.exports = async function(gradebook, courseConfig, options) {
 
     debug('Saved gradebook CSV on git.');
   }
-
 };
