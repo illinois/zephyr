@@ -11,28 +11,32 @@ const spawnAsync = async (...args) => {
   const opts = (args.length >= 3) ? (args[2] || {}) : {};
   const maxBuffer = opts.maxBuffer || 200 * 1024; // Default for spawnSync
   const killSignal = opts.killSignal || 'SIGTERM'; // Default for spawnSync
+  let error = undefined;
 
   return new Promise((resolve) => {
     const child = spawn.apply(spawn, args);
-    const killChild = () => child.kill(killSignal);
+    const killChild = (code) => () => {
+      error = { code };
+      child.kill(killSignal);
+    };
     let timeoutId = null;
     if (opts.timeout) {
-      timeoutId = setTimeout(killChild, opts.timeout);
+      timeoutId = setTimeout(killChild('ETIMEDOUT'), opts.timeout);
     }
     let stdout = '';
     let stderr = '';
     child.stdout && child.stdout.on('data', (data) => {
       stdout += data;
-      if (stdout.length > maxBuffer) killChild();
+      if (stdout.length > maxBuffer) killChild('ENOBUFS')();
     });
     child.stderr && child.stderr.on('data', (data) => {
       stderr += data;
-      if (stderr.length > maxBuffer) killChild();
+      if (stderr.length > maxBuffer) killChild('ENOBUFS')();
     });
     child.on('close', (code, signal) => {
       child.removeAllListeners();
       if (timeoutId) clearTimeout(timeoutId);
-      resolve({ pid: child.pid, stdout, stderr, status: code, signal });
+      resolve({ pid: child.pid, stdout, stderr, status: code, signal, error });
     });
     child.on('error', error => {
       child.removeAllListeners();
