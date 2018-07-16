@@ -32,4 +32,8 @@ describe('mock-github-filetree', () => {
       { name: 'mp1.cpp', path: 'mp1/mp1.cpp', size: 7, type: 'file' }
     ]);
   });
+
+  it('handles missing file', async () => {
+    expect(mockGithubFiletree({ path: 'mp1/rip/not-here.js' })).rejects.toThrow();
+  });
 });
