@@ -25,7 +25,6 @@ const fetchDirectory = async (repoPath, checkoutPath, context) => {
     ref: context.ref,
   });
 
-
   const promises = res.data.map(d => {
     if (d.type == 'file' && d.size > 0) {
       // standard file
@@ -71,7 +70,7 @@ module.exports = async ({ repoPath, files = [], checkoutPath, timestamp, ...opti
   const fetchContext = {
     octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
-    files: files.map(f => path.join(repoPath, f)),
+    files: files.map(f => path.join(repoPath, f.name)),
     ...options,
   };
 

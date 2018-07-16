@@ -3,6 +3,7 @@ const path = require('path');
 const tmp = require('tmp');
 const debug = require('debug')('zephyr:grade');
 
+const courseConfig = require('./load-course-config')();
 const checkout = require('./checkout');
 const loadAssignmentConfig = require('./load-assignment-config');
 const gradeStudent = require('./grade-student');
@@ -26,8 +27,8 @@ module.exports = async (options) => {
     await checkout({
       checkoutPath: assignmentDir,
       repoPath: options.assignment,
-      org: 'cs225-staff',
-      repo: 'assignments',
+      org: courseConfig.assignments.org,
+      repo: courseConfig.assignments.repo,
     });
   }
 
@@ -35,36 +36,29 @@ module.exports = async (options) => {
   // the available run configurations (eg: which files are student files / grader files)
   debug(`Loading assignment.yaml config for ${options.assignment}...`);
   const assignmentConfig = await loadAssignmentConfig(options, assignmentDir);
-  assignmentConfig.autograderFilePaths = [path.join('graderFiles', 'catch')]; // autograderStaticFilesPath
-  assignmentConfig.autograderArgs = ['grader.js', 'test'];
 
   // Find the list of NetIDs to grade:
-  let studentFolders;
+  let netids;
   if (options.netid) {
     console.log(`Running for student: ${options.netid}`);
-    studentFolders = [ options.netid ];
+    netids = [ options.netid ];
   } else {
-    console.error('TODO: support student roster');
-    process.exit(1);
-
-    debug('Fetching the list of student NetIDs...');
-    studentFolders = await require('./fetchStudentRoster.js')();
+    debug('Using netids from course config');
+    netids = courseConfig.roster;
 
     // --run-one option, selecting a random student:
     if (options['run-one']) {
-      const index = Math.floor( Math.random() * studentFolders.length );
-      studentFolders = [ studentFolders[index] ] ;
-      console.log(`--run-one selected a random student: ${studentFolders[0]}`);
+      const index = Math.floor( Math.random() * netids.length );
+      netids = [ netids[index] ] ;
+      console.log(`--run-one selected a random student: ${netids[0]}`);
     }
   }
 
   // Run the autograder
-  slack.message(`Grading ${studentFolders.length} submissions.`);
+  slack.message(`Grading ${netids.length} submissions.`);
   debug('Running student code...');
   const autograderResults = {};
-  for (let i = 0; i < studentFolders.length; i++) {
-    const netid = studentFolders[i];
-
+  for (const netid of netids) {
     if (options.resume) {
       const outputFile = path.join(options.outputPath, `${netid}.json`);
       if (fs.existsSync(outputFile)) {

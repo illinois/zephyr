@@ -4,7 +4,7 @@ const debug = require('debug')('zephyr:cli');
 const path = require('path');
 const os = require('os');
 const grade = require('./grade');
-const processResults = require('./process-results');
+const generateReports = require('./generate-reports');
 const argv = require('yargs')
   .option('assignment', {
     describe: 'Assignment name',
@@ -129,7 +129,7 @@ fs.ensureDirSync(argv.outputPath);
 // Top-level async/await hack
 (async () => {
   const results = await grade(argv);
-  await processResults(results, argv);
+  await generateReports(results, argv);
 })().catch(e => {
   console.error(e);
   process.exit(1);

@@ -9,6 +9,10 @@ grades:
   host: github-dev.cs.illinois.edu
   org: cs225-staff
   repo: sp18-autograder-grades
+feedback:
+  host: github-dev.cs.illinois.edu
+  org: cs225-staff
+  repo: sp18-studentFeedback
 roster:
   - abhaymv2
   - abs4

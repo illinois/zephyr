@@ -4,6 +4,7 @@ const tmp = require('tmp');
 const debug = require('debug')('zephyr:grade-student');
 const MergeTrees = require('merge-trees');
 
+const courseConfig = require('./load-course-config')();
 const checkout = require('./checkout');
 const grader = require('./grader');
 const slack = require('./slack');
@@ -27,6 +28,7 @@ module.exports = async (options, assignmentConfig, netid) => {
       repoPath: options.assignment,
       files: assignmentConfig.studentFiles,
       checkoutPath: tempStudentFiles.name,
+      org: courseConfig.submissions.org,
     };
     result.sha = await checkout(checkoutOptions);
   } catch (e) {
@@ -43,9 +45,8 @@ module.exports = async (options, assignmentConfig, netid) => {
   const sourceDirectories = [
     ...assignmentConfig.baseFilePaths,
     tempStudentFiles.name,
-    ...assignmentConfig.autograderFilePaths
   ];
-  const mergeTrees = new MergeTrees(sourceDirectories, tempPath);
+  const mergeTrees = new MergeTrees(sourceDirectories, tempPath, { overwrite: true });
   mergeTrees.merge();
 
   // Time to run some tests

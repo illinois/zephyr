@@ -12,7 +12,8 @@ const withTestFixture = (name, fn) => {
   return withDir(async ({ path }) => {
     const mergeTrees = new MergeTrees(
       [getFixtureDirectory('base'), getFixtureDirectory(name)],
-      path
+      path,
+      { overwrite: true }
     );
     mergeTrees.merge();
     const options = { cwd: path };

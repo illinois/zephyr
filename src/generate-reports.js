@@ -18,16 +18,13 @@ const generateReportHtml = exports.generateReportHtml = function(result) {
     result.testCases = processCatch(result.grader_output);
   }
 
-  //
   // Setup variables for the HTML template:
-  //
   const output = {
     testCases: result.testCases,
     time: moment(result.timestamp).format('MMMM Do YYYY, h:mm:ss a'),
     sha: result.sha,
     netid: result.netid
   };
-
 
   if (!result.success) {
     output.succeeded = false;

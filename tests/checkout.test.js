@@ -72,7 +72,7 @@ describe('checkout', () => {
     const options = {
       repoPath: '',
       checkoutPath: '/test',
-      files: ['.gitignore'],
+      files: [{ name: '.gitignore' }],
     };
 
     const sha = await checkout(options);
@@ -101,7 +101,7 @@ describe('checkout', () => {
     const options = {
       repoPath: 'mp1',
       checkoutPath: '/test',
-      files: ['mp1.cpp'],
+      files: [{ name: 'mp1.cpp' }],
     };
 
     const sha = await checkout(options);

@@ -5,18 +5,21 @@ const SimpleSchema = require('simpl-schema').default;
 // We'll cache the loaded config here
 let config = null;
 
+const makeGithubSchema = (name, repo = true) => {
+  const schema = {
+    [name]: Object,
+    [`${name}.host`]: String,
+    [`${name}.org`]: String,
+  };
+  if (repo) schema[`${name}.repo`] = String;
+  return schema;
+};
+
 const schema = new SimpleSchema({
-  'assignments': Object,
-  'assignments.host': String,
-  'assignments.org': String,
-  'assignments.repo': String,
-  'submissions': Object,
-  'submissions.host': String,
-  'submissions.org': String,
-  'grades': Object,
-  'grades.host': String,
-  'grades.org': String,
-  'grades.repo': String,
+  ...makeGithubSchema('assignments'),
+  ...makeGithubSchema('submissions', false),
+  ...makeGithubSchema('grades'),
+  ...makeGithubSchema('feedback'),
   'roster': [String],
 });
 
