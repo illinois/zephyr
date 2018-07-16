@@ -11,7 +11,7 @@ const copyAllFilesInDir = (srcPath, destPath) => {
   let allFilesSame = true;
 
   debug(`Copying: ${srcPath}`);
-  fs.readdirSync(srcPath).forEach(function (fileName) {
+  fs.readdirSync(srcPath).forEach((fileName) => {
     const src = path.join(srcPath, fileName);
     const dest = path.join(destPath, fileName);
     let isSame;
@@ -45,7 +45,7 @@ const copyAllFilesInDir = (srcPath, destPath) => {
 };
 
 /* runOneStudent */
-module.exports = async function (options, assignmentConfig, netid) {
+module.exports = async (options, assignmentConfig, netid) => {
   //
   // Create the result object:
   //
@@ -66,16 +66,19 @@ module.exports = async function (options, assignmentConfig, netid) {
   //
   // Fetch student files (from git)
   //
-  const temp_fetchStudentFiles = tmp.dirSync({ unsafeCleanup: true });
+  const tempStudentFiles = tmp.dirSync({ unsafeCleanup: true });
   try {
     const checkoutOptions = {
-      repoPath: assignmentConfig
-    }
-    result.sha = await checkout(argv, assignmentConfig, netid, temp_fetchStudentFiles.name);
+      repo: netid,
+      repoPath: options.assignment,
+      files: assignmentConfig.studentFiles,
+      checkoutPath: tempStudentFiles.name,
+    };
+    result.sha = await checkout(checkoutOptions);
   } catch (e) {
-    temp_fetchStudentFiles.removeCallback();
+    tempStudentFiles.removeCallback();
 
-    if (argv.cleanup) { tempPathObj.removeCallback(); }
+    if (options.cleanup) { tempPathObj.removeCallback(); }
     else { console.log(`No --cleanup, files remain at ${tempPath}`); }
 
     debug(`Failed to fetch files for ${netid}`, e);
@@ -89,18 +92,14 @@ module.exports = async function (options, assignmentConfig, netid) {
   // Copy all files
   //
   // 1. Copy base files
-  assignmentConfig.baseFilePaths.forEach(function (folder) {
-    copyAllFilesInDir(folder, tempPath);
-  });
+  assignmentConfig.baseFilePaths.forEach((folder) => copyAllFilesInDir(folder, tempPath));
 
   // 2. Add (overwriting base files, if needed) student files
-  copyAllFilesInDir(temp_fetchStudentFiles.name, tempPath);
-  temp_fetchStudentFiles.removeCallback();
+  copyAllFilesInDir(tempStudentFiles.name, tempPath);
+  tempStudentFiles.removeCallback();
 
   // 3. Add required grader files for the autograder
-  assignmentConfig.autograderFilePaths.forEach(function (folder) {
-    copyAllFilesInDir(folder, tempPath);
-  });
+  assignmentConfig.autograderFilePaths.forEach((folder) => copyAllFilesInDir(folder, tempPath));
 
 
   //
@@ -117,10 +116,10 @@ module.exports = async function (options, assignmentConfig, netid) {
   debug(`GRADING FINISHED : ${netid}`);
 
   // Export files:
-  assignmentConfig.exportFiles.forEach(function (exportFileName) {
+  assignmentConfig.exportFiles.forEach((exportFileName) => {
     console.log(exportFileName);
     const exportFilePath = path.join(tempPath, exportFileName);
-    let exportSavePath = path.join(argv.outputPath, 'export');
+    let exportSavePath = path.join(options.outputPath, 'export');
     fs.ensureDirSync(exportSavePath);
     exportSavePath = path.join(exportSavePath, `${netid}-${exportFileName}`);
 
@@ -154,7 +153,7 @@ module.exports = async function (options, assignmentConfig, netid) {
     result.success = false;
     result.errors = ['Unable to capture grader output.'];
 
-    if (argv.cleanup) { tempPathObj.removeCallback(); }
+    if (options.cleanup) { tempPathObj.removeCallback(); }
     else { console.log(`No --cleanup, files remain at ${tempPath}`); }
 
     return result;
@@ -162,7 +161,7 @@ module.exports = async function (options, assignmentConfig, netid) {
 
 
 
-  if (argv.cleanup) { tempPathObj.removeCallback(); }
+  if (options.cleanup) { tempPathObj.removeCallback(); }
   else { console.log(`No --cleanup, files remain at ${tempPath}`); }
   return result;
 };

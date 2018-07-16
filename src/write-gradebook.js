@@ -30,7 +30,7 @@ module.exports = async function(gradebook, courseConfig, options) {
       repo: courseConfig.grades.repo,
       path: `${options.id}.csv`,
       message: 'autograder generated feedback file',
-      content: new Buffer(csv).toString('base64')
+      content: Buffer.from(csv).toString('base64')
     });
 
     debug('Saved gradebook CSV on git.');

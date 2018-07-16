@@ -73,7 +73,7 @@ module.exports = async function(argv, resultsDict) {
         repo: 'sp18-studentFeedback',
         path: path.join(argv.id, `${netid  }.html`),
         message: 'autograder generated feedback file',
-        content: new Buffer(html).toString('base64')
+        content: Buffer.from(html).toString('base64')
       });
     }
 
