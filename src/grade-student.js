@@ -1,71 +1,25 @@
 const fs = require('fs-extra');
 const path = require('path');
 const tmp = require('tmp');
-const spawnSync = require('child_process').spawnSync;
 const debug = require('debug')('zephyr:grade-student');
+const MergeTrees = require('merge-trees');
 
 const checkout = require('./checkout');
+const grader = require('./grader');
 const slack = require('./slack');
 
-const copyAllFilesInDir = (srcPath, destPath) => {
-  let allFilesSame = true;
-
-  debug(`Copying: ${srcPath}`);
-  fs.readdirSync(srcPath).forEach((fileName) => {
-    const src = path.join(srcPath, fileName);
-    const dest = path.join(destPath, fileName);
-    let isSame;
-
-    if ( fs.lstatSync(src).isDirectory() ) {
-      fs.ensureDirSync(dest);
-      isSame = copyAllFilesInDir(src, dest);
-    } else {
-      debug(`--> Copying: ${src} => ${dest}`);
-
-      if (fs.existsSync(dest)) {
-        const src_str = fs.readFileSync(src, {encoding: 'utf8'}).replace(/[\n\r]/gm, '');
-        const dest_str = fs.readFileSync(dest, {encoding: 'utf8'}).replace(/[\n\r]/gm, '');
-
-        isSame = src_str == dest_str;
-
-        if (isSame) { debug(`SKIP: ${src} (file not changed)`); }
-        else        { debug(`NEW: ${src} (file changed)`); }
-      } else {
-        debug(`NEW: ${dest} (file did not exist)`);
-        isSame = false;
-      }
-
-      if (!isSame) { fs.copySync(src, dest); }
-    }
-
-    if (!isSame) { allFilesSame = false; }
-  });
-
-  return allFilesSame;
-};
-
-/* runOneStudent */
 module.exports = async (options, assignmentConfig, netid) => {
-  //
-  // Create the result object:
-  //
   const result = {
     netid: netid,
     timestamp: options.timestamp
   };
 
-
-  //
-  // Create a temp folder to place all grader into:
-  //
+  // Create a temp folder to place all grader files into
   const tempPathObj = tmp.dirSync({ unsafeCleanup: options.cleanup });
   const tempPath = tempPathObj.name;
   debug(`Using temp path for ${netid}: ${tempPath}`);
 
-
-  //
-  // Fetch student files (from git)
-  //
+  // Fetch student files from GitHub
   const tempStudentFiles = tmp.dirSync({ unsafeCleanup: true });
   try {
     const checkoutOptions = {
@@ -76,44 +30,35 @@ module.exports = async (options, assignmentConfig, netid) => {
     };
     result.sha = await checkout(checkoutOptions);
   } catch (e) {
+    console.error(`Failed to fetch files for ${netid}`, e);
     tempStudentFiles.removeCallback();
+    tempPathObj.removeCallback();
 
-    if (options.cleanup) { tempPathObj.removeCallback(); }
-    else { console.log(`No --cleanup, files remain at ${tempPath}`); }
-
-    debug(`Failed to fetch files for ${netid}`, e);
     result.success = false;
     result.errors = [e.message];
     return result;
   }
 
+  // We'll need to merge several sets of files
+  const sourceDirectories = [
+    ...assignmentConfig.baseFilePaths,
+    tempStudentFiles.name,
+    ...assignmentConfig.autograderFilePaths
+  ];
+  const mergeTrees = new MergeTrees(sourceDirectories, tempPath);
+  mergeTrees.merge();
 
-  //
-  // Copy all files
-  //
-  // 1. Copy base files
-  assignmentConfig.baseFilePaths.forEach((folder) => copyAllFilesInDir(folder, tempPath));
+  // Time to run some tests
+  debug(`> Grading started: ${netid}`);
+  let graderResults;
+  try {
+    graderResults = await grader({ cwd: tempPath });
+  } catch (e) {
+    debug(`> Grading errored: ${netid}`);
+    slack.warning(`Unable to grade submission from ${netid}!`, JSON.stringify(e));
+  }
 
-  // 2. Add (overwriting base files, if needed) student files
-  copyAllFilesInDir(tempStudentFiles.name, tempPath);
-  tempStudentFiles.removeCallback();
-
-  // 3. Add required grader files for the autograder
-  assignmentConfig.autograderFilePaths.forEach((folder) => copyAllFilesInDir(folder, tempPath));
-
-
-  //
-  // Run
-  //
-  debug(`GRADING STARTED : ${netid}`);
-  // This node process will compute its own timeout based on the timeout of
-  // all test cases
-  const p = spawnSync('node', assignmentConfig.autograderArgs, {
-    'cwd': tempPath,
-    'shell': true,
-    'stdio': ['pipe', 'pipe', 'pipe', 'pipe']
-  });
-  debug(`GRADING FINISHED : ${netid}`);
+  debug(`Grading succeeded: ${netid}`);
 
   // Export files:
   assignmentConfig.exportFiles.forEach((exportFileName) => {
@@ -129,37 +74,8 @@ module.exports = async (options, assignmentConfig, netid) => {
     }
   });
 
-  // Capture output:
-  try {
-    const grader_output = JSON.parse(p.output[3].toString());
-    result.success = true;
-    result.grader_output = grader_output;
-  } catch (e) {
-    slack.warning(`Unable to capture grader result for ${netid}!`, JSON.stringify(e));
-    const logIfPresent = str => {
-      if (!str) return;
-      // Remove trailing newline since console.log adds one anyways
-      if (str[str.length - 1] === '\n') str = str.slice(0, -1);
-      console.log(str);
-    };
-    console.log('===BEGIN STDOUT===');
-    logIfPresent(p.output[1].toString());
-    console.log('===END STDOUT===');
-    console.log('===BEGIN STDERR===');
-    logIfPresent(p.output[2].toString());
-    console.log('===END STDERR===');
-    console.warn(`Unable to capture grader result for ${netid}!`);
-    console.warn(e);
-    result.success = false;
-    result.errors = ['Unable to capture grader output.'];
-
-    if (options.cleanup) { tempPathObj.removeCallback(); }
-    else { console.log(`No --cleanup, files remain at ${tempPath}`); }
-
-    return result;
-  }
-
-
+  result.success = true;
+  result.graderResults = graderResults;
 
   if (options.cleanup) { tempPathObj.removeCallback(); }
   else { console.log(`No --cleanup, files remain at ${tempPath}`); }
