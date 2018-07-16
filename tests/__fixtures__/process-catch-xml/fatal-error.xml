@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catch name="test">
+  <Group name="test">
+    <TestCase name="testDrawMazeMed" tags="[part2][weight=10]" filename="tests/test_part2.cpp" line="305">
+      <FatalErrorCondition filename="tests/test_part2.cpp" line="305">
+        SIGSEGV - Segmentation violation signal
+      </FatalErrorCondition>
+      <OverallResult success="false"/>
+    </TestCase>
+    <OverallResults successes="0" failures="1" expectedFailures="0"/>
+  </Group>
+  <OverallResults successes="0" failures="1" expectedFailures="0"/>
+</Catch>

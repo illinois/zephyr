@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catch name="test">
+  <Group name="test">
+  </Group>
+  <OverallResults successes="1" failures="0" expectedFailures="0" />
+</Catch>

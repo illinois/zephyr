@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catch name="test">
+<Group name="test">
+  <TestCase name="StickerSheet's assignment operator makes an independent copy" tags="[part=2][weight=2]" filename="tests/part2.cpp" line="244">
+     <Exception filename="tests/part2.cpp" line="244">std::bad_alloc</Exception>
+     <OverallResult success="false" />
+  </TestCase>
+  <OverallResults successes="0" failures="1" expectedFailures="0" />
+</Group>
+<OverallResults successes="0" failures="1" expectedFailures="0" />
+</Catch>

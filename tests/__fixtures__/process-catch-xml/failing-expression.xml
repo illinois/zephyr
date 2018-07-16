@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catch name="test">
+<Group name="test">
+<TestCase name="testDrawSolutionLarge" tags="[part2][timeout=30000][weight=10]" filename="tests/test_part2.cpp" line="338">
+  <Expression success="false" type="REQUIRE" filename="tests/test_part2.cpp" line="347">
+    <Original>
+      *actualOutput == solnImage
+    </Original>
+    <Expanded>
+      PNG(w=5001, h=5001, hash=3fe0000000000000)
+==
+PNG(w=5001, h=5001, hash=3fe0000000000000)
+    </Expanded>
+  </Expression>
+  <OverallResult success="false"/>
+</TestCase>
+<OverallResults successes="0" failures="1" expectedFailures="0"/>
+</Group>
+<OverallResults successes="0" failures="1" expectedFailures="0"/>
+</Catch>

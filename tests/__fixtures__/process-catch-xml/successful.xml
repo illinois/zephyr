@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Catch name="test">
+  <Group name="test">
+    <TestCase name="testDrawSolutionLarge" tags="[part2][timeout=30000][weight=10]" filename="tests/test_part2.cpp" line="338">
+      <OverallResult success="true" />
+    </TestCase>
+    <OverallResults successes="1" failures="0" expectedFailures="0" />
+  </Group>
+  <OverallResults successes="1" failures="0" expectedFailures="0" />
+</Catch>

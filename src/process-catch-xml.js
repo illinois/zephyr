@@ -6,16 +6,17 @@ function formatExpression(json) {
   const original = json[0]['Original'][0].trim();
   const expanded = json[0]['Expanded'][0].trim();
 
-  return `Original: ${original}\n` + `Expanded: ${expanded}`;
+  return `Original: ${original}\nExpanded: ${expanded}`;
 }
 
 
-function processCatchResult(result) {
+module.exports = async (result) => {
   const xml = result.stdout;
   let catchJSON;
   try {
-    catchJSON = xml2js(xml);
+    catchJSON = await xml2js(xml);
   } catch (e) {
+    console.error(e);
     return {
       name: result.name,
       success: false,
@@ -41,13 +42,13 @@ function processCatchResult(result) {
   if (!success) {
     if (catchJSON['Catch']['Group'][0]['TestCase'][0]['FatalErrorCondition']) {
       const error = catchJSON['Catch']['Group'][0]['TestCase'][0]['FatalErrorCondition'][0]['_'].trim();
-      output = `Fatal Error: ${  error}`;
+      output = `Fatal Error: ${error}`;
     } else if ( catchJSON['Catch']['Group'][0]['TestCase'][0]['Exception'] ) {
       const error = catchJSON['Catch']['Group'][0]['TestCase'][0]['Exception'][0]['_'].trim();
-      output = `Exception: ${  error}`;
+      output = `Exception: ${error}`;
     } else if ( catchJSON['Catch']['Group'][0]['TestCase'][0]['Failure'] ) {
       const error = catchJSON['Catch']['Group'][0]['TestCase'][0]['Failure'][0]['_'].trim();
-      output = `FAIL: ${  error}`;
+      output = `FAIL: ${error}`;
     } else if (catchJSON['Catch']['Group'][0]['TestCase'][0]['Section']) {
       catchJSON['Catch']['Group'][0]['TestCase'][0]['Section'].forEach(section => {
         if (section['Expression']) {
@@ -58,24 +59,20 @@ function processCatchResult(result) {
     } else {
       //console.log( catchJSON['Catch']['Group'][0]['TestCase'][0]['Expression'][0] );
       try {
-        output = formatExpression( catchJSON['Catch']['Group'][0]['TestCase'][0]['Expression'] );
+        output = formatExpression(catchJSON['Catch']['Group'][0]['TestCase'][0]['Expression']);
       } catch (e) {
         output = catchJSON['Catch']['Group'][0]['TestCase'];
-        console.log(' UNKNWON CATCH OUTPUT: ');
-        console.log(output);
       }
     }
   }
 
   // Complete test case
   return {
-    name: result.tags.name,
+    name: result.name,
     tags: result.tags,
     success: success,
     weight: result.tags.weight,
     earned: (success) ? result.tags.weight : 0,
     output: output,
   };
-}
-
-module.exports = processCatchResult;
+};
