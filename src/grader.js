@@ -42,12 +42,7 @@ const spawnAsync = async (...args) => {
   });
 };
 
-module.exports = async ({ workdir, }) => {
-  // == Command Line Args ==
-  // The first command line arg is the name of the `main` created by `make`.
-  // (Default: `test`)
-  const execCommand = 'test';
-
+module.exports = async ({ cwd, execCommand = './test'}) => {
   const results = [];
   const recordResult = (testCase, p) => {
     const result = {
@@ -74,13 +69,13 @@ module.exports = async ({ workdir, }) => {
   };
 
   // Run `make`
-  const p = await spawnAsync('make', [execCommand], {});
+  const p = await spawnAsync('make', [execCommand], { cwd });
   recordResult({name: 'make', tags: {make: true}}, p);
 
   // Only continue if `make` was successful
   if (p.status === 0) {
     // Ask `catch` to list all test cases and tags
-    const p = await spawnAsync(execCommand, ['--list-test-names-only']);
+    const p = await spawnAsync(execCommand, ['--list-test-names-only'], { cwd });
     const catchListOutputLines = p.stdout.toString().split('\n');
     catchListOutputLines.pop();  // Remove blank entry at end
 
@@ -90,7 +85,7 @@ module.exports = async ({ workdir, }) => {
       const testCaseName = catchListOutputLines[i].trim().replace(/,/g, '\\,');
 
       // Test case tags:
-      const p = await spawnAsync(execCommand, ['-t', testCaseName]);
+      const p = await spawnAsync(execCommand, ['-t', testCaseName], { cwd });
       const catchTagsOutputlines = p.stdout.toString().split('\n');
 
       // Default tag values:
@@ -131,6 +126,7 @@ module.exports = async ({ workdir, }) => {
     // Run the test cases
     for (const testCase of testCases) {
       const opts = {
+        cwd,
         timeout: testCase.tags.timeout,
         maxBuffer: 1024 * 1024,
         killSignal: 'SIGKILL'
