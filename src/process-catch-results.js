@@ -9,7 +9,7 @@ const processCatchXML = require('./process-catch-xml.js');
  * - output
  * - message
  */
-module.exports = function (results) {
+module.exports = async function (results) {
   if (!results) return [];
 
   const testCases = [];
@@ -58,7 +58,7 @@ module.exports = function (results) {
       });
 
     } else {
-      const testCase = processCatchXML(result);
+      const testCase = await processCatchXML(result);
       if (testCase) {
         testCase.name = result.name;
 

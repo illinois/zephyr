@@ -31,6 +31,7 @@
     "lodash": "^4.17.10",
     "merge-trees": "^2.0.0",
     "moment": "^2.22.2",
+    "ora": "^2.1.0",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.5",
     "simpl-schema": "^1.5.0",

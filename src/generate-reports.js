@@ -4,6 +4,7 @@ const moment = require('moment');
 const debug = require('debug')('zephyr:output-formatter');
 const handlebars = require('handlebars');
 
+const courseConfig = require('./load-course-config')();
 const octokit = require('./octokit')();
 const computeScore = require('./compute-score');
 const writeGradebook = require('./write-gradebook');
@@ -46,15 +47,15 @@ const generateReportHtml = exports.generateReportHtml = function(result) {
   return studentReportTemplate(output);
 };
 
-module.exports = async function(argv, resultsDict) {
-  const studentFeedbackDir = path.join( argv.outputPath, 'studentFeedback');
+module.exports = async function(results, options) {
+  const studentFeedbackDir = path.join(options.outputPath, 'studentFeedback');
   fs.ensureDirSync(studentFeedbackDir);
 
   const gradebook = {};
-  const keys = Object.keys(resultsDict);
+  const keys = Object.keys(results);
   for (let i = 0; i < keys.length; i++) {
     const netid = keys[i];
-    const result = resultsDict[netid];
+    const result = results[netid];
 
     const score = computeScore(result);
     const html = generateReportHtml(result);
@@ -64,11 +65,11 @@ module.exports = async function(argv, resultsDict) {
     fs.writeFileSync( path.join( studentFeedbackDir, `${netid  }.html` ), html );
 
     // Store file on git (graded runs)
-    if (argv.graded) {
+    if (options.graded) {
       await octokit.repos.createFile({
-        owner: org,
-        repo: 'sp18-studentFeedback',
-        path: path.join(argv.id, `${netid  }.html`),
+        owner: courseConfig.feedback.owner,
+        repo: courseConfig.feedback.repo,
+        path: path.join(options.id, `${netid  }.html`),
         message: 'autograder generated feedback file',
         content: Buffer.from(html).toString('base64')
       });
@@ -77,6 +78,6 @@ module.exports = async function(argv, resultsDict) {
     gradebook[netid] = score;
   }
 
-  await writeGradebook(argv, gradebook);
+  await writeGradebook(gradebook, courseConfig, options);
   return gradebook;
 };

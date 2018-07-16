@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const tmp = require('tmp');
 const debug = require('debug')('zephyr:grade');
+const ora = require('ora');
 
 const courseConfig = require('./load-course-config')();
 const checkout = require('./checkout');
@@ -21,7 +22,8 @@ module.exports = async (options) => {
     debug(`Using local assignment root ${options.assignmentRoot}...`);
     assignmentDir = path.join(options.assignmentRoot, options.assignment);
   } else {
-    console.log(`Fetching ${options.assignment} from git...`);
+    const spinner = ora(`Fetching ${options.assignment} from git`).start();
+    // console.log(`Fetching ${options.assignment} from git...`);
     assignmentTmpDir = tmp.dirSync({ unsafeCleanup: options.cleanup });
     assignmentDir = assignmentTmpDir.name;
     await checkout({
@@ -30,6 +32,7 @@ module.exports = async (options) => {
       org: courseConfig.assignments.org,
       repo: courseConfig.assignments.repo,
     });
+    spinner.succeed();
   }
 
   // Read the assignments.yaml file in the `assignmentRoot` directory to find
@@ -40,7 +43,7 @@ module.exports = async (options) => {
   // Find the list of NetIDs to grade:
   let netids;
   if (options.netid) {
-    console.log(`Running for student: ${options.netid}`);
+    debug(`Running for student: ${options.netid}`);
     netids = [ options.netid ];
   } else {
     debug('Using netids from course config');
@@ -68,16 +71,21 @@ module.exports = async (options) => {
       }
     }
 
+    const spinner = ora(`Grading submission from ${netid}`).start();
+
     const result = await gradeStudent(options, assignmentConfig, netid);
-    result.testCases = processCatchResults(result.grader_output);
-    console.log(result);
+    result.testCases = await processCatchResults(result.graderResults);
 
     const outputFile = path.join(options.outputPath, `${netid}.json`);
     fs.writeFileSync(outputFile, JSON.stringify(result));
     autograderResults[netid] = result;
 
     const grade = computeScore(result);
-    console.log(`Graded: ${netid} - ${grade.pct100}%`);
+    if (result.success) {
+      spinner.succeed(`Graded ${netid}: ${grade.pct100}%`);
+    } else {
+      spinner.fail(`Could not grade submission from ${netid}`);
+    }
   }
 
   // Cleanup

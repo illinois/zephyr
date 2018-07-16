@@ -2,8 +2,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const tmp = require('tmp');
 const debug = require('debug')('zephyr:grade-student');
-const MergeTrees = require('merge-trees');
 
+const mergeIntoDirectory = require('./merge-into-directory');
 const courseConfig = require('./load-course-config')();
 const checkout = require('./checkout');
 const grader = require('./grader');
@@ -21,7 +21,8 @@ module.exports = async (options, assignmentConfig, netid) => {
   debug(`Using temp path for ${netid}: ${tempPath}`);
 
   // Fetch student files from GitHub
-  const tempStudentFiles = tmp.dirSync({ unsafeCleanup: true });
+  const tempStudentFiles = tmp.dirSync({ unsafeCleanup: false });
+  debug(`Fetching student files to ${tempStudentFiles.name}`);
   try {
     const checkoutOptions = {
       repo: netid,
@@ -46,8 +47,7 @@ module.exports = async (options, assignmentConfig, netid) => {
     ...assignmentConfig.baseFilePaths,
     tempStudentFiles.name,
   ];
-  const mergeTrees = new MergeTrees(sourceDirectories, tempPath, { overwrite: true });
-  mergeTrees.merge();
+  sourceDirectories.forEach(directory => mergeIntoDirectory(directory, tempPath));
 
   // Time to run some tests
   debug(`> Grading started: ${netid}`);
@@ -78,7 +78,8 @@ module.exports = async (options, assignmentConfig, netid) => {
   result.success = true;
   result.graderResults = graderResults;
 
-  if (options.cleanup) { tempPathObj.removeCallback(); }
-  else { console.log(`No --cleanup, files remain at ${tempPath}`); }
+  if (options.cleanup) {
+    tempPathObj.removeCallback();
+  }
   return result;
 };
