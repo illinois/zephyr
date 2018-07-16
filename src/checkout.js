@@ -13,8 +13,8 @@ const doDownload = async (downloadUrl, checkoutPath) => {
 };
 
 // If the files list is empty, we always need this file/directory
-const needsFile = (path, files) => !files || files.some(f => f == path);
-const needsDirectory = (path, files) => !files || files.some(f => f.startsWith(path));
+const needsFile = (path, files) => !files.length || files.some(f => f == path);
+const needsDirectory = (path, files) => !files.length || files.some(f => f.startsWith(path));
 
 const fetchDirectory = async (repoPath, checkoutPath, context) => {
   const { files } = context;
@@ -25,16 +25,21 @@ const fetchDirectory = async (repoPath, checkoutPath, context) => {
     ref: context.ref,
   });
 
+
   const promises = res.data.map(d => {
-    if (d.type == 'file' && d.size > 0 && needsFile(d.path, files)) {
+    if (d.type == 'file' && d.size > 0) {
       // standard file
-      return doDownload(d.download_url, path.join(checkoutPath, d.name), );
+      if (needsFile(d.path, files)) {
+        return doDownload(d.download_url, path.join(checkoutPath, d.name));
+      }
     } else if (d.type == 'file' && d.size == 0) {
       // submodule? ignore for now
-    } else if (d.type == 'dir' && needsDirectory(d.path, files)) {
-      return fetchDirectory(d.path, path.join(checkoutPath, d.name), context);
+    } else if (d.type == 'dir') {
+      if (needsDirectory(d.path, files)) {
+        return fetchDirectory(d.path, path.join(checkoutPath, d.name), context);
+      }
     } else {
-      console.error(`Unknown git response: ${  d}`);
+      console.error(`Unknown git response: ${d}`);
     }
   });
   await Promise.all(promises);
@@ -62,7 +67,7 @@ const fetchTimestampedSha = async (timestamp, context) => {
   return commits.data[0].sha;
 };
 
-module.exports = async ({ repoPath, files, checkoutPath, timestamp, ...options }) => {
+module.exports = async ({ repoPath, files = [], checkoutPath, timestamp, ...options }) => {
   const fetchContext = {
     octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
