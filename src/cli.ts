@@ -1,11 +1,13 @@
 require('dotenv').load();
-const fs = require('fs-extra');
+import fs from 'fs-extra';
 const debug = require('debug')('zephyr:cli');
-const path = require('path');
-const os = require('os');
-const grade = require('./grade');
-const generateReports = require('./generate-reports');
-const argv = require('yargs')
+import path from 'path';
+import os from 'os';
+import grade from './grade';
+import generateReports from './generate-reports';
+import { Options } from './types';
+
+const argv: Options = require('yargs')
   .option('assignment', {
     describe: 'Assignment name',
     demandOption: 'An assignment is required'
@@ -67,7 +69,7 @@ const argv = require('yargs')
   .argv;
 
 // Let's validate some stuff
-const fatal = (msg, exitCode = 1) => {
+const fatal = (msg: string, exitCode = 1) => {
   console.error(msg);
   process.exit(exitCode);
 };
@@ -80,14 +82,11 @@ if (!process.env.GHE_TOKEN) {
   fatal('You must provide a GitHub token via the GHE_TOKEN environment variable');
 }
 
-if (!argv['skip-ews-check']
-    && (process.platform != 'linux' || !os.hostname().includes('ews.illinois.edu'))
-    && !argv.containerize) {
+if (!argv['skip-ews-check'] && (process.platform != 'linux' || !os.hostname().includes('ews.illinois.edu'))) {
   fatal('You should be running the grader in an EWS Linux machine for '
         + 'actual grading.\n'
         + 'Even testing should be done on EWS, but if needed locally, '
-        + 'use --skip-ews-check.\n'
-        + 'Either way, it\'s better to use --containerize on local machines.');
+        + 'use --skip-ews-check.');
 }
 
 if (argv.cleanup === undefined) {

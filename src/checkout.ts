@@ -8,11 +8,11 @@ import Github from '@octokit/rest';
 import { StudentFile, CheckoutOptions } from './types';
 
 interface CheckoutContext {
-  files: string[],
   org: string,
   repo: string,
   ref: string,
-  octokit: Github
+  octokit: Github,
+  files?: string[],
 }
 
 interface GithubFile {
@@ -31,8 +31,8 @@ const doDownload = async (downloadUrl: string, checkoutPath: string) => {
 };
 
 // If the files list is empty, we always need this file/directory
-const needsFile = (path: string, files: string[]) => !files.length || files.some(f => f == path);
-const needsDirectory = (path: string, files: string[]) => !files.length || files.some(f => f.startsWith(path));
+const needsFile = (path: string, files?: string[]) => !files || files.some(f => f == path);
+const needsDirectory = (path: string, files?: string[]) => !files || files.some(f => f.startsWith(path));
 
 const fetchDirectory = async (repoPath: string, checkoutPath: string, context: CheckoutContext) => {
   const { files } = context;
@@ -85,7 +85,7 @@ const fetchTimestampedSha = async (timestamp: string, context: CheckoutContext) 
 };
 
 export default async (options: CheckoutOptions) => {
-  const { repoPath, files, checkoutPath, timestamp, ...rest } = options;
+  const { ref, repoPath, files, checkoutPath, timestamp, ...rest } = options;
   const checkoutContext: CheckoutContext = {
     octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
@@ -93,7 +93,9 @@ export default async (options: CheckoutOptions) => {
     ...rest,
   } as CheckoutContext;
 
-  if (timestamp) {
+  if (ref) {
+    checkoutContext.ref = ref;
+  } else if (timestamp) {
     checkoutContext.ref = await fetchTimestampedSha(timestamp, checkoutContext);
   } else {
     // Even if a timestamp isn't specified, we should still pin all requests to

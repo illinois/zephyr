@@ -1,8 +1,8 @@
 /* eslint-env jest */
 
-const { default: mockFs } = require('jest-plugin-fs');
-const octokit = require('../src/octokit');
-const checkout = require('../src/checkout');
+import mockFs from 'jest-plugin-fs';
+import octokit from '../src/octokit';
+import checkout from '../src/checkout';
 
 const MOCK_COMMITS_SHA = 'fedcba';
 const MOCK_REFERENCE_SHA = 'abcdef';
@@ -46,13 +46,12 @@ afterEach(() => {
   mockFs.restore();
 });
 
-// We need a fake github to respond to our requests!
-// We'll build a fake file tree and then mock the GitHub API to "serve" it to us
-
+const REPO_OPTIONS = { org: 'test', repo: 'test' };
 
 describe('checkout', () => {
   it('checks out the entire repo', async () => {
     const options = {
+      ...REPO_OPTIONS,
       repoPath: '',
       checkoutPath: '/test',
     };
@@ -70,9 +69,10 @@ describe('checkout', () => {
 
   it('checks out the .gitignore file', async () => {
     const options = {
+      ...REPO_OPTIONS,
       repoPath: '',
       checkoutPath: '/test',
-      files: [{ name: '.gitignore' }],
+      files: [{ name: '.gitignore', required: true }],
     };
 
     const sha = await checkout(options);
@@ -84,6 +84,7 @@ describe('checkout', () => {
 
   it('checks out the mp1 directory', async () => {
     const options = {
+      ...REPO_OPTIONS,
       repoPath: 'mp1',
       checkoutPath: '/test',
     };
@@ -99,9 +100,10 @@ describe('checkout', () => {
 
   it('checks out specific files in the mp1 directory', async () => {
     const options = {
+      ...REPO_OPTIONS,
       repoPath: 'mp1',
       checkoutPath: '/test',
-      files: [{ name: 'mp1.cpp' }],
+      files: [{ name: 'mp1.cpp', required: true }],
     };
 
     const sha = await checkout(options);
@@ -113,6 +115,7 @@ describe('checkout', () => {
 
   it ('uses the provided timestamp to determine which revision to fetch', async () => {
     const options = {
+      ...REPO_OPTIONS,
       repoPath: 'mp1',
       checkoutPath: '/test',
       timestamp: '2017-10-01T01:54:55+00:00'
@@ -127,28 +130,61 @@ describe('checkout', () => {
     });
   });
 
-  it('pins all request to the same ref (no timestamp)', async () => {
+  it ('uses the provided timestamp to determine which revision to fetch', async () => {
     const options = {
+      ...REPO_OPTIONS,
+      repoPath: 'mp1',
+      checkoutPath: '/test',
+      ref: 'deadbeef'
+    };
+
+    const sha = await checkout(options);
+    expect(sha).toEqual('deadbeef');
+    expect(mockFs.files()).toEqual({
+      '/test/mp1.cpp': 'content',
+      '/test/tests/test1.cpp': 'content',
+      '/test/tests/test2.cpp': 'content',
+    });
+  });
+
+  it('pins all request to the same ref', async () => {
+    const options = {
+      ...REPO_OPTIONS,
       repoPath: 'mp1',
       checkoutPath: '/test',
     };
 
     await checkout(options);
-    octokit().repos.getContent.mock.calls.forEach(call => {
+    (octokit() as any).repos.getContent.mock.calls.forEach((call: any) => {
       expect(call[0].ref).toEqual(MOCK_REFERENCE_SHA);
     });
   });
 
   it('pins all request to the same ref (with timestamp)', async () => {
     const options = {
+      ...REPO_OPTIONS,
       repoPath: 'mp1',
       checkoutPath: '/test',
       timestamp: '2017-10-01T01:54:55+00:00'
     };
 
     await checkout(options);
-    octokit().repos.getContent.mock.calls.forEach(call => {
+    (octokit() as any).repos.getContent.mock.calls.forEach((call: any) => {
       expect(call[0].ref).toEqual(MOCK_COMMITS_SHA);
+    });
+  });
+
+  it('pins all request to the same ref (with ref)', async () => {
+    const options = {
+      ...REPO_OPTIONS,
+      repoPath: 'mp1',
+      checkoutPath: '/test',
+      ref: 'deadbeef'
+    };
+
+    await checkout(options);
+    (octokit() as any).repos.getContent.mock.calls.forEach((call: any) => {
+      expect(call[0].ref).toEqual('deadbeef');
     });
   });
 });

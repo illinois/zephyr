@@ -13,7 +13,7 @@ import computeScore from './compute-score';
 import * as slack from './slack';
 import { Options, Gradebook, StudentGraderResults } from './types';
 
-module.exports = async (options: Options): Promise<StudentGraderResults> => {
+export default async (options: Options): Promise<StudentGraderResults> => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);
 
   // Fetch the assignment from git

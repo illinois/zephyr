@@ -31,6 +31,7 @@ export default async (options: Options, assignmentConfig: AssignmentConfig, neti
       files: assignmentConfig.studentFiles,
       checkoutPath: tempStudentFiles.name,
       org: courseConfig.submissions.org,
+      ref: options.ref,
     };
     result.sha = await checkout(checkoutOptions);
   } catch (e) {

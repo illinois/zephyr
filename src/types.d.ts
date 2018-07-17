@@ -61,9 +61,11 @@ export interface Options {
   cleanup: boolean,
   netid?: string,
   ['run-one']: boolean,
+  ['skip-ews-check']: boolean,
   resume: boolean,
   outputPath: string,
   timestamp: string,
+  ref: string,
 }
 
 export interface StudentFile {
@@ -75,8 +77,9 @@ export interface CheckoutOptions {
   org: string,
   repo: string,
   repoPath: string,
-  files?: StudentFile[],
   checkoutPath: string,
+  files?: StudentFile[],
+  ref?: string,
   timestamp?: string,
 }
 
