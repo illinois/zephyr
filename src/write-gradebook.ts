@@ -1,12 +1,13 @@
-const fs = require('fs-extra');
-const { promisify } = require('util');
-const path = require('path');
+import fs from 'fs-extra';
+import { promisify } from 'util';
+import path from 'path';
 const debug = require('debug')('zephyr:output-formatter');
-const octokit = require('./octokit');
+import octokit from './octokit';
+import { Score, Gradebook, CourseConfig, Options } from './types';
 const csvStringify = promisify(require('csv-stringify'));
 
-module.exports = async function(gradebook, courseConfig, options) {
-  const csvRows = [];
+export default async function(gradebook: Gradebook, courseConfig: CourseConfig, options: Options) {
+  const csvRows: (string|number)[][] = [];
 
   // Headers
   csvRows.push(['netid', 'score', 'error', 'ec']);
@@ -27,7 +28,7 @@ module.exports = async function(gradebook, courseConfig, options) {
   if (options.graded) {
     await octokit().repos.createFile({
       owner: courseConfig.grades.org,
-      repo: courseConfig.grades.repo,
+      repo: courseConfig.grades.repo as string,
       path: `${options.id}.csv`,
       message: 'autograder generated feedback file',
       content: Buffer.from(csv).toString('base64')

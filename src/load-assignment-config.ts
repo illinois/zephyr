@@ -1,9 +1,11 @@
-const fs = require('fs-extra');
-const path = require('path');
-const yaml = require('js-yaml');
+import { AssignmentConfig, Options, StudentFile } from "./types";
+
+import fs from 'fs-extra';
+import path from 'path';
+import yaml from 'js-yaml';
 const debug = require('debug')('zephyr:load-assignment-config');
 
-module.exports = async function(argv, assignmentPath) {
+export default async function(options: Options, assignmentPath: string): Promise<AssignmentConfig> {
   // Load the assignment-specific YAML config:
   const assignmentYamlPath = path.join(assignmentPath, 'assignment.yaml');
   if (!fs.existsSync(assignmentYamlPath)) {
@@ -13,16 +15,16 @@ module.exports = async function(argv, assignmentPath) {
   const assignmentInfo = yaml.safeLoad(fs.readFileSync(assignmentYamlPath, 'utf8'));
 
   // Ensure our config exists
-  if (!assignmentInfo.autograder.run[argv.run]) {
-    console.log(`Assignment config file ${assignmentYamlPath} has no rule to run "${argv.run}".`);
+  if (!assignmentInfo.autograder.run[options.run]) {
+    console.log(`Assignment config file ${assignmentYamlPath} has no rule to run "${options.run}".`);
   }
 
   // Create our assignmentConfig oject:
-  const assignmentConfig = {
+  const assignmentConfig: AssignmentConfig = {
     baseFilePaths: [],
     studentFiles: [],
     exportFiles: [],
-    assignmentPath: assignmentPath
+    assignmentPath: assignmentPath,
   };
 
   //
@@ -34,7 +36,7 @@ module.exports = async function(argv, assignmentPath) {
     debug(`Config added base file path: ${p}`);
   }
 
-  const p = path.join(assignmentPath, `autograder-${argv.run}`);
+  const p = path.join(assignmentPath, `autograder-${options.run}`);
   if (fs.existsSync(p)) {
     assignmentConfig.baseFilePaths.push(p);
     debug(`Config added base file path: ${p}`);
@@ -45,12 +47,12 @@ module.exports = async function(argv, assignmentPath) {
   //
   // Import assignment specific config:
   //
-  const runConfig = assignmentInfo.autograder.run[argv.run];
+  const runConfig = assignmentInfo.autograder.run[options.run];
 
   if (runConfig.export) {
     assignmentConfig.exportFiles = assignmentConfig.exportFiles.concat( runConfig.export );
   }
-  assignmentConfig.studentFiles = runConfig.studentFiles.map(function (d) {
+  assignmentConfig.studentFiles = runConfig.studentFiles.map((d: string | StudentFile) => {
     if (typeof(d) === 'string') {
       return { name: d, required: true };
     } else {

@@ -1,4 +1,28 @@
-const spawn = require('child_process').spawn;
+import { TestCaseResult, GraderOptions } from "./types";
+
+import { spawn, ChildProcess, spawnSync, SpawnOptions, SpawnSyncOptions } from 'child_process';
+
+type SpawnError = {
+  code: string,
+} | Error;
+
+interface SpawnResult {
+  pid: number,
+  stdout: string,
+  stderr: string,
+  status: number | null,
+  signal?: string | null
+  error?: SpawnError,
+}
+
+type TestCaseTags = {
+  [name: string]: any,
+}
+
+interface TestCase {
+  name: string,
+  tags: TestCaseTags
+}
 
 // Wraps `spawn` in a Promise to allow us to use async/await
 // Based on https://github.com/expo/spawn-async/blob/master/src/spawnAsync.js
@@ -7,21 +31,21 @@ const spawn = require('child_process').spawn;
 // resolving with a non-zero status.
 // Copies a lot of behavior from spawnAsync, namely, output capturing and
 // timeouts. We need to do this async in order to keep the event loop free.
-const spawnAsync = async (...args) => {
-  const opts = (args.length >= 3) ? (args[2] || {}) : {};
+const spawnAsync = async (command: string, args?: ReadonlyArray<string>, options?: SpawnSyncOptions): Promise<SpawnResult> => {
+  const opts = options || {};
   const maxBuffer = opts.maxBuffer || 200 * 1024; // Default for spawnSync
   const killSignal = opts.killSignal || 'SIGTERM'; // Default for spawnSync
-  let error = undefined;
+  let error: SpawnError | undefined = undefined;
 
-  return new Promise((resolve) => {
-    const child = spawn.apply(spawn, args);
-    const killChild = (code) => () => {
+  return new Promise<SpawnResult>((resolve) => {
+    const child: ChildProcess = spawn.apply(spawn, arguments);
+    const killChild = (code: string) => () => {
       error = { code };
       child.kill(killSignal);
     };
-    let timeoutId = null;
+    let timeoutId: NodeJS.Timer | null = null;
     if (opts.timeout) {
-      timeoutId = setTimeout(killChild('ETIMEDOUT'), opts.timeout);
+      timeoutId = setTimeout(killChild('ETIMEDOUT'), opts.timeout as number);
     }
     let stdout = '';
     let stderr = '';
@@ -41,21 +65,23 @@ const spawnAsync = async (...args) => {
     child.on('error', error => {
       child.removeAllListeners();
       if (timeoutId) clearTimeout(timeoutId);
-      resolve({ pid: child.pid, stdout, stderr, status: null, error });
+      const result = { pid: child.pid, stdout, stderr, status: null, signal: null, error } as SpawnResult
+      resolve(result);
     });
   });
 };
 
-module.exports = async ({ cwd, execCommand = './test'}) => {
-  const results = [];
-  const recordResult = (testCase, p) => {
-    const result = {
+export default async (options: GraderOptions): Promise<Array<TestCaseResult>> => {
+  const { cwd, execCommand = './test' } = options;
+  const results: TestCaseResult[] = [];
+  const recordResult = (testCase: TestCase, p: SpawnResult) => {
+    const result: TestCaseResult = {
       exitCode: p.status,
       signal: p.signal,
       error: p.error,
       name: testCase.name,
       tags: testCase.tags,
-    };
+    } as TestCaseResult;
 
     try {
       result.stdout = p.stdout.toString().substring(0, 10 * 1024);
@@ -83,7 +109,7 @@ module.exports = async ({ cwd, execCommand = './test'}) => {
     const catchListOutputLines = p.stdout.toString().split('\n');
     catchListOutputLines.pop();  // Remove blank entry at end
 
-    const testCases = [];
+    const testCases: Array<TestCase> = [];
     for (let i = 0; i < catchListOutputLines.length; i++) {
       // Test case name:
       const testCaseName = catchListOutputLines[i].trim().replace(/,/g, '\\,');
@@ -93,26 +119,26 @@ module.exports = async ({ cwd, execCommand = './test'}) => {
       const catchTagsOutputlines = p.stdout.toString().split('\n');
 
       // Default tag values:
-      const testCaseTags = {
+      const testCaseTags: TestCaseTags = {
         weight: 1,
         timeout: 10000
       };
 
       catchTagsOutputlines.forEach(function (s) {
         // Matches: "[tag=4]", "[valgrind]", etc
-        const tag_re = /\[((\w+)(=(\w+))?)\]/g;
+        const tagRegex = /\[((\w+)(=(\w+))?)\]/g;
         let match;
 
-        while ((match = tag_re.exec(s))) {
+        while ((match = tagRegex.exec(s))) {
           // Capture the groups:
-          const tagName = match[2];
-          let tagValue = match[4];
+          const tagName: string = match[2];
+          let tagValue: any = match[4];
 
           // For tags without a value (eg: [valgrind]), default to true
           if (tagValue === undefined) { tagValue = true; }
 
           // Save the tag; store it as an int for "weight" and "timeout"
-          if (tagName == 'weight' || tagName == 'timeout') {
+          if (tagName === 'weight' || tagName === 'timeout') {
             testCaseTags[tagName] = parseInt(tagValue);
           } else {
             testCaseTags[tagName] = tagValue;
@@ -131,6 +157,7 @@ module.exports = async ({ cwd, execCommand = './test'}) => {
     for (const testCase of testCases) {
       const opts = {
         cwd,
+        asdf: 'asdf',
         timeout: testCase.tags.timeout,
         maxBuffer: 1024 * 1024,
         killSignal: 'SIGKILL'

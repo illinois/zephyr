@@ -1,19 +1,20 @@
-const fs = require('fs-extra');
-const path = require('path');
-const tmp = require('tmp');
+import fs from 'fs-extra';
+import path from 'path';
+import tmp from 'tmp';
 const debug = require('debug')('zephyr:grade-student');
 
-const mergeIntoDirectory = require('./merge-into-directory');
+import mergeIntoDirectory from './merge-into-directory';
 const courseConfig = require('./load-course-config')();
-const checkout = require('./checkout');
-const grader = require('./grader');
-const slack = require('./slack');
+import checkout from './checkout';
+import grader from './grader';
+import * as slack from './slack';
+import { Options, GraderResult, AssignmentConfig, TestCaseResult } from './types';
 
-module.exports = async (options, assignmentConfig, netid) => {
-  const result = {
+export default async (options: Options, assignmentConfig: AssignmentConfig, netid: string) => {
+  const result: GraderResult = {
     netid: netid,
     timestamp: options.timestamp
-  };
+  } as GraderResult;
 
   // Create a temp folder to place all grader files into
   const tempPathObj = tmp.dirSync({ unsafeCleanup: options.cleanup });
@@ -51,9 +52,9 @@ module.exports = async (options, assignmentConfig, netid) => {
 
   // Time to run some tests
   debug(`> Grading started: ${netid}`);
-  let graderResults;
+  let testCaseResults: Array<TestCaseResult> = [];
   try {
-    graderResults = await grader({ cwd: tempPath });
+    testCaseResults = await grader({ cwd: tempPath });
   } catch (e) {
     debug(`> Grading errored: ${netid}`);
     slack.warning(`Unable to grade submission from ${netid}!`, JSON.stringify(e));
@@ -76,7 +77,7 @@ module.exports = async (options, assignmentConfig, netid) => {
   });
 
   result.success = true;
-  result.graderResults = graderResults;
+  result.testCaseResults = testCaseResults;
 
   if (options.cleanup) {
     tempPathObj.removeCallback();

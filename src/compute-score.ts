@@ -1,9 +1,12 @@
-module.exports = (result) => {
-  const score = {
+import { GraderResult, Score } from "./types";
+
+export default (result: GraderResult): Score => {
+  const score: Score = {
     weight: 0,
     earned: 0,
     extraCredit: 0,
     pct: 0,
+    pct100: '0%',
     errors: result.errors
   };
 

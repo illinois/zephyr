@@ -1,22 +1,23 @@
-const fs = require('fs-extra');
-const path = require('path');
-const moment = require('moment');
+import fs from 'fs-extra';
+import path from 'path';
+import moment from 'moment';
 const debug = require('debug')('zephyr:output-formatter');
-const handlebars = require('handlebars');
+import handlebars from 'handlebars';
 
 const courseConfig = require('./load-course-config')();
 const octokit = require('./octokit')();
-const computeScore = require('./compute-score');
-const writeGradebook = require('./write-gradebook');
-const processCatch = require('./process-catch-results');
+import computeScore from './compute-score';
+import writeGradebook from './write-gradebook';
+import processCatch from './process-catch-results';
+import { GraderResult, StudentGraderResults, Options, Gradebook } from './types';
 
 const studentReportTemplatePath = path.join(__dirname, 'templates', 'student-report.hbs');
 const studentReportTemplate = handlebars.compile(fs.readFileSync(studentReportTemplatePath, 'utf8'));
 
-const generateReportHtml = exports.generateReportHtml = function(result) {
+const generateReportHtml = exports.generateReportHtml = async function(result: GraderResult) {
   // If there's any catch data, process it
-  if (result.grader_output) {
-    result.testCases = processCatch(result.grader_output);
+  if (result.testCaseResults) {
+    result.testCases = await processCatch(result.testCaseResults);
   }
 
   // Setup variables for the HTML template:
@@ -25,7 +26,7 @@ const generateReportHtml = exports.generateReportHtml = function(result) {
     time: moment(result.timestamp).format('MMMM Do YYYY, h:mm:ss a'),
     sha: result.sha,
     netid: result.netid
-  };
+  } as any;
 
   if (!result.success) {
     output.succeeded = false;
@@ -47,18 +48,18 @@ const generateReportHtml = exports.generateReportHtml = function(result) {
   return studentReportTemplate(output);
 };
 
-module.exports = async function(results, options) {
+export default async function(results: StudentGraderResults, options: Options): Promise<Gradebook> {
   const studentFeedbackDir = path.join(options.outputPath, 'studentFeedback');
   fs.ensureDirSync(studentFeedbackDir);
 
-  const gradebook = {};
+  const gradebook: Gradebook = {};
   const keys = Object.keys(results);
   for (let i = 0; i < keys.length; i++) {
     const netid = keys[i];
     const result = results[netid];
 
     const score = computeScore(result);
-    const html = generateReportHtml(result);
+    const html = await generateReportHtml(result);
 
     // Store file to disk
     debug(`Saving student report: ${  path.join( studentFeedbackDir, `${netid  }.html` )}`);

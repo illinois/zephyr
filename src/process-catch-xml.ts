@@ -1,16 +1,16 @@
-const { promisify } = require('util');
+import { promisify } from 'util';
 const xml2js = promisify(require('xml2js').parseString);
-const validator = require('validator');
+import validator from 'validator';
+import { TestCaseResult, TestCase } from './types';
 
-function formatExpression(json) {
+function formatExpression(json: any) {
   const original = json[0]['Original'][0].trim();
   const expanded = json[0]['Expanded'][0].trim();
-
+``
   return `Original: ${original}\nExpanded: ${expanded}`;
 }
 
-
-module.exports = async (result) => {
+export default async (result: TestCaseResult): Promise<TestCase> => {
   const xml = result.stdout;
   let catchJSON;
   try {
@@ -50,7 +50,7 @@ module.exports = async (result) => {
       const error = catchJSON['Catch']['Group'][0]['TestCase'][0]['Failure'][0]['_'].trim();
       output = `FAIL: ${error}`;
     } else if (catchJSON['Catch']['Group'][0]['TestCase'][0]['Section']) {
-      catchJSON['Catch']['Group'][0]['TestCase'][0]['Section'].forEach(section => {
+      catchJSON['Catch']['Group'][0]['TestCase'][0]['Section'].forEach((section: any) => {
         if (section['Expression']) {
           output += formatExpression(section['Expression']);
           output += '\n';
@@ -69,7 +69,7 @@ module.exports = async (result) => {
   // Complete test case
   return {
     name: result.name,
-    tags: result.tags,
+    // tags: result.tags,
     success: success,
     weight: result.tags.weight,
     earned: (success) ? result.tags.weight : 0,

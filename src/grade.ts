@@ -1,23 +1,24 @@
-const fs = require('fs-extra');
-const path = require('path');
-const tmp = require('tmp');
+import fs from 'fs-extra';
+import path from 'path';
+import tmp from 'tmp';
 const debug = require('debug')('zephyr:grade');
-const ora = require('ora');
+import ora from 'ora';
 
 const courseConfig = require('./load-course-config')();
-const checkout = require('./checkout');
-const loadAssignmentConfig = require('./load-assignment-config');
-const gradeStudent = require('./grade-student');
-const processCatchResults = require('./process-catch-results');
-const computeScore = require('./compute-score');
-const slack = require('./slack');
+import checkout from './checkout';
+import loadAssignmentConfig from './load-assignment-config';
+import gradeStudent from './grade-student';
+import processCatchResults from './process-catch-results';
+import computeScore from './compute-score';
+import * as slack from './slack';
+import { Options, Gradebook, StudentGraderResults } from './types';
 
-module.exports = async (options) => {
+module.exports = async (options: Options): Promise<StudentGraderResults> => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);
 
   // Fetch the assignment from git
-  let assignmentDir;
-  let assignmentTmpDir;
+  let assignmentDir: string;
+  let assignmentTmpDir: tmp.SynchrounousResult | undefined;
   if (options.assignmentRoot) {
     debug(`Using local assignment root ${options.assignmentRoot}...`);
     assignmentDir = path.join(options.assignmentRoot, options.assignment);
@@ -60,7 +61,7 @@ module.exports = async (options) => {
   // Run the autograder
   slack.message(`Grading ${netids.length} submissions.`);
   debug('Running student code...');
-  const autograderResults = {};
+  const autograderResults: StudentGraderResults = {};
   for (const netid of netids) {
     if (options.resume) {
       const outputFile = path.join(options.outputPath, `${netid}.json`);
@@ -74,7 +75,7 @@ module.exports = async (options) => {
     const spinner = ora(`Grading submission from ${netid}`).start();
 
     const result = await gradeStudent(options, assignmentConfig, netid);
-    result.testCases = await processCatchResults(result.graderResults);
+    result.testCases = await processCatchResults(result.testCaseResults);
 
     const outputFile = path.join(options.outputPath, `${netid}.json`);
     fs.writeFileSync(outputFile, JSON.stringify(result));

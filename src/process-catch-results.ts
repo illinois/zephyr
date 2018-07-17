@@ -1,23 +1,13 @@
-const processCatchXML = require('./process-catch-xml.js');
+import processCatchXML from './process-catch-xml.js';
+import { TestCaseResult, TestCase } from './types.js';
 
-/**
- * Processes the result of a grader run, running an array of test cases with the following object-keys:
- * - success, (true|false)
- * - name, name of the test case
- * - weight
- * - earned
- * - output
- * - message
- */
-module.exports = async function (results) {
+export default async function (results: Array<TestCaseResult>) {
   if (!results) return [];
 
-  const testCases = [];
+  const testCases: Array<TestCase> = [];
   const keys = Object.keys(results);
 
-  for (let i = 0; i < keys.length; i++) {
-    const result = results[keys[i]];
-
+  for (const result of results) {
     if (result.tags.make) {
       // Record `make` output:
       testCases.push({
@@ -40,9 +30,9 @@ module.exports = async function (results) {
       });
     } else if (result.error) {
       let error;
-      if (result.error.code == 'ETIMEDOUT') {
+      if (result.error.code === 'ETIMEDOUT') {
         error = `Unable to Grade (ETIMEDOUT): Your code did not finish within ${result.tags.timeout}ms.`;
-      } else if (result.error.code == 'ENOBUFS') {
+      } else if (result.error.code === 'ENOBUFS') {
         error = 'Unable to Grade (ENOBUFS): Your code had over 1 MB of output, exceeding the allowed buffer space.';
       } else {
         error = `Unable to Grade (error): ${JSON.stringify(result.error)}`;

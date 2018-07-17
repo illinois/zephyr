@@ -1,11 +1,29 @@
-const fs = require('fs-extra');
-const path = require('path');
+import fs from 'fs-extra';
+import path from 'path';
 const debug = require('debug')('zephyr:checkout');
-const rp = require('request-promise-native');
-const Octokit = require('./octokit');
-const moment = require('moment');
+import rp from 'request-promise-native';
+import Octokit from './octokit';
+import moment from 'moment';
+import Github from '@octokit/rest';
+import { StudentFile, CheckoutOptions } from './types';
 
-const doDownload = async (downloadUrl, checkoutPath) => {
+interface CheckoutContext {
+  files: string[],
+  org: string,
+  repo: string,
+  ref: string,
+  octokit: Github
+}
+
+interface GithubFile {
+  name: string,
+  size: number,
+  type: 'file' | 'dir',
+  path: string,
+  download_url: string,
+}
+
+const doDownload = async (downloadUrl: string, checkoutPath: string) => {
   const body = await rp({ uri: downloadUrl, encoding: null });
   fs.ensureDirSync(path.join(checkoutPath, '..'));
   fs.writeFileSync(checkoutPath, body, {encoding: 'binary'});
@@ -13,10 +31,10 @@ const doDownload = async (downloadUrl, checkoutPath) => {
 };
 
 // If the files list is empty, we always need this file/directory
-const needsFile = (path, files) => !files.length || files.some(f => f == path);
-const needsDirectory = (path, files) => !files.length || files.some(f => f.startsWith(path));
+const needsFile = (path: string, files: string[]) => !files.length || files.some(f => f == path);
+const needsDirectory = (path: string, files: string[]) => !files.length || files.some(f => f.startsWith(path));
 
-const fetchDirectory = async (repoPath, checkoutPath, context) => {
+const fetchDirectory = async (repoPath: string, checkoutPath: string, context: CheckoutContext) => {
   const { files } = context;
   const res = await context.octokit.repos.getContent({
     owner: context.org,
@@ -25,7 +43,7 @@ const fetchDirectory = async (repoPath, checkoutPath, context) => {
     ref: context.ref,
   });
 
-  const promises = res.data.map(d => {
+  const promises = res.data.map((d: GithubFile) => {
     if (d.type == 'file' && d.size > 0) {
       // standard file
       if (needsFile(d.path, files)) {
@@ -44,7 +62,7 @@ const fetchDirectory = async (repoPath, checkoutPath, context) => {
   await Promise.all(promises);
 };
 
-const fetchMasterSha = async (context) => {
+const fetchMasterSha = async (context: CheckoutContext) => {
   debug(`Fetching SHA of master for ${context.repo}`);
 
   const res = await context.octokit.gitdata.getReference({
@@ -55,7 +73,7 @@ const fetchMasterSha = async (context) => {
   return res.data.object.sha;
 };
 
-const fetchTimestampedSha = async (timestamp, context) => {
+const fetchTimestampedSha = async (timestamp: string, context: CheckoutContext) => {
   const commits = await context.octokit.repos.getCommits({
     owner: context.org,
     repo: context.repo,
@@ -66,23 +84,24 @@ const fetchTimestampedSha = async (timestamp, context) => {
   return commits.data[0].sha;
 };
 
-module.exports = async ({ repoPath, files = [], checkoutPath, timestamp, ...options }) => {
-  const fetchContext = {
+export default async (options: CheckoutOptions) => {
+  const { repoPath, files, checkoutPath, timestamp, ...rest } = options;
+  const checkoutContext: CheckoutContext = {
     octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
-    files: files.map(f => path.join(repoPath, f.name)),
-    ...options,
-  };
+    files: files && files.map((f: StudentFile) => path.join(repoPath, f.name)),
+    ...rest,
+  } as CheckoutContext;
 
   if (timestamp) {
-    fetchContext.ref = await fetchTimestampedSha(timestamp, fetchContext);
+    checkoutContext.ref = await fetchTimestampedSha(timestamp, checkoutContext);
   } else {
     // Even if a timestamp isn't specified, we should still pin all requests to
     // a specific commit so that we don't have a condition where someone
     // pushes code in the middle of a checkout process
-    fetchContext.ref = await fetchMasterSha(fetchContext);
+    checkoutContext.ref = await fetchMasterSha(checkoutContext);
   }
 
-  await fetchDirectory(repoPath, checkoutPath, fetchContext);
-  return fetchContext.ref;
+  await fetchDirectory(repoPath, checkoutPath, checkoutContext);
+  return checkoutContext.ref;
 };
