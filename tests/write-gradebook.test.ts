@@ -1,6 +1,7 @@
 /* eslint-env jest */
-const { default: mockFsControl, mock: fs } = require('jest-plugin-fs');
-const writeGradebook = require('../src/write-gradebook');
+import mockFsControl, { mock as fs } from 'jest-plugin-fs';
+import writeGradebook from '../src/write-gradebook';
+import { Gradebook, CourseConfig, Options, Score } from '../src/types';
 
 jest.mock('fs', () => require('jest-plugin-fs/mock'));
 jest.mock('../src/octokit', () => {
@@ -12,7 +13,7 @@ jest.mock('../src/octokit', () => {
       },
     };
   });
-  mock.__createFileMock = createFileMock;
+  (mock as any).__createFileMock = createFileMock;
   return mock;
 });
 
@@ -25,13 +26,12 @@ afterEach(() => {
   mockFsControl.restore();
 });
 
-const makeGradebook = (extra) => ({
+const makeGradebook = (extra = {}): Gradebook => ({
   'nwalter2': {
-    pct100: 70,
-    errors: null,
+    pct100: '70',
     extraCredit: 2,
-    ...extra,
-  },
+    ...extra
+  } as Score,
 });
 
 const makeCourseConfig = () => ({
@@ -41,7 +41,7 @@ const makeCourseConfig = () => ({
   },
 });
 
-const makeOptions = (extra) => ({
+const makeOptions = (extra = {}) => ({
   outputPath: '/',
   id: 'testing',
   graded: false,
@@ -54,7 +54,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig, options);
+    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
 
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\n');
   });
@@ -64,7 +64,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig, options);
+    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
 
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\nnwalter2,70,,2\n');
   });
@@ -74,7 +74,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig, options);
+    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
 
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\nnwalter2,70,testing,2\n');
   });
@@ -84,7 +84,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig, options);
+    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
 
     const expected = 'netid,score,error,ec\nnwalter2,70,"could not grade, rip;please try again",2\n';
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual(expected);
@@ -95,7 +95,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig, options);
+    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
 
     const { __createFileMock } = require('../src/octokit');
     expect(__createFileMock).not.toBeCalled();
@@ -106,7 +106,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions({ graded: true });
 
-    await writeGradebook(gradebook, courseConfig, options);
+    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
 
     const { __createFileMock } = require('../src/octokit');
     expect(__createFileMock).toBeCalled();

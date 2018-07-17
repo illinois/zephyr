@@ -1,7 +1,5 @@
 declare module 'jest-plugin-fs' {
-  export function restore(): void
-  export function files(): {
-    [name: string]: string
-  }
-  export function mock(): void
+  export let restore: any
+  export let files: any
+  export let mock: any
 }

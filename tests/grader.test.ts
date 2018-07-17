@@ -1,14 +1,15 @@
 /* eslint-env jest */
-const path = require('path');
-const { withDir } = require('tmp-promise');
-const MergeTrees = require('merge-trees');
-const grader = require('../src/grader');
+import path from 'path';
+import { withDir } from 'tmp-promise';
+import MergeTrees from 'merge-trees';
+import grader from '../src/grader';
+import { TestCaseResult } from '../src/types';
 
 const TEST_TIMEOUT = 15000; // 15 seconds
 
-const getFixtureDirectory = (name) => path.join(__dirname, '__fixtures__', 'grader', name);
+const getFixtureDirectory = (name: string) => path.join(__dirname, '__fixtures__', 'grader', name);
 
-const withTestFixture = (name, fn) => {
+const withTestFixture = (name: string, fn: (results: Array<TestCaseResult>) => any) => {
   return withDir(async ({ path }) => {
     const mergeTrees = new MergeTrees(
       [getFixtureDirectory('base'), getFixtureDirectory(name)],
@@ -18,13 +19,13 @@ const withTestFixture = (name, fn) => {
     mergeTrees.merge();
     const options = { cwd: path };
     const results = await grader(options);
-    await fn({ results, path });
+    fn(results);
   }, { unsafeCleanup: true });
 };
 
 describe('grader', () => {
   it('grades successful code with one test case', async () => {
-    await withTestFixture('passing', ({ results }) => {
+    await withTestFixture('passing', (results) => {
       expect(results.length).toBe(2);
       results.forEach(result => expect(result.exitCode).toBe(0));
 
@@ -39,7 +40,7 @@ describe('grader', () => {
   }, TEST_TIMEOUT);
 
   it('grades code that times out with timeout set via tag', async () => {
-    await withTestFixture('timeout-tag', ({ results }) => {
+    await withTestFixture('timeout-tag', (results) => {
       expect(results.length).toBe(2);
 
       // Make phase
@@ -57,7 +58,7 @@ describe('grader', () => {
   }, TEST_TIMEOUT);
 
   it('grades code that produces too much output', async () => {
-    await withTestFixture('too-much-output', ({ results }) => {
+    await withTestFixture('too-much-output', (results) => {
       expect(results.length).toBe(2);
 
       // Make phase

@@ -1,11 +1,8 @@
-import processCatchXML from './process-catch-xml.js';
-import { TestCaseResult, TestCase } from './types.js';
+import processCatchXML from './process-catch-xml';
+import { TestCaseResult, TestCase } from './types';
 
 export default async function (results: Array<TestCaseResult>) {
-  if (!results) return [];
-
   const testCases: Array<TestCase> = [];
-  const keys = Object.keys(results);
 
   for (const result of results) {
     if (result.tags.make) {

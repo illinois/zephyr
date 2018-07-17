@@ -1,6 +1,6 @@
 import { TestCaseResult, GraderOptions } from "./types";
 
-import { spawn, ChildProcess, spawnSync, SpawnOptions, SpawnSyncOptions } from 'child_process';
+import { spawn, ChildProcess, SpawnSyncOptions } from 'child_process';
 
 type SpawnError = {
   code: string,
@@ -38,7 +38,7 @@ const spawnAsync = async (command: string, args?: ReadonlyArray<string>, options
   let error: SpawnError | undefined = undefined;
 
   return new Promise<SpawnResult>((resolve) => {
-    const child: ChildProcess = spawn.apply(spawn, arguments);
+    const child: ChildProcess = spawn(command, args, options);
     const killChild = (code: string) => () => {
       error = { code };
       child.kill(killSignal);

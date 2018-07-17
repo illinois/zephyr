@@ -4,7 +4,7 @@ export interface Score {
   extraCredit: number,
   pct: number,
   pct100: string,
-  errors: Array<string>
+  errors?: Array<string>
 }
 
 export interface GraderResult {
@@ -14,7 +14,7 @@ export interface GraderResult {
   success: boolean,
   testCases: Array<TestCase>,
   testCaseResults: Array<TestCaseResult>
-  errors: Array<string>,
+  errors?: Array<string>,
 }
 
 export interface StudentGraderResults {
@@ -97,12 +97,12 @@ export interface TestCaseTags {
 }
 
 export interface TestCaseResult {
-  exitCode: number | null,
-  signal: string,
-  error?: any,
   name: string,
   tags: TestCaseTags,
-  stdout: string,
-  stderr: string,
+  exitCode?: number | null,
+  signal?: string,
+  error?: any,
+  stdout?: string,
+  stderr?: string,
 }
 

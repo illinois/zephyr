@@ -1,20 +1,21 @@
 /* eslint-env jest */
-const path = require('path');
-const { promisify } = require('util');
+import path from 'path';
+import { promisify } from 'util';
 const readFile = promisify(require('fs-extra').readFile);
-const processCatchXml = require('../src/process-catch-xml');
+import processCatchXml from '../src/process-catch-xml';
+import { TestCase, TestCaseResult } from '../src/types';
 
 const NAME = 'process-catch-xml-test';
 
-const loadFixture = (name) => readFile(path.join(__dirname, '__fixtures__', 'process-catch-xml', `${name}.xml`));
+const loadFixture = (name: string) => readFile(path.join(__dirname, '__fixtures__', 'process-catch-xml', `${name}.xml`));
 
-const makeResult = xml => ({
+const makeResult = (xml: string) => ({
   name: NAME,
   tags: { weight: 1 },
   stdout: xml,
 });
 
-const checkFailedResult = (result) => {
+const checkFailedResult = (result: TestCase) => {
   expect(result.name).toEqual(NAME);
   expect(result.success).toEqual(false);
   expect(result.weight).toEqual(1);
@@ -24,7 +25,7 @@ const checkFailedResult = (result) => {
 describe('process-catch-results', () => {
   it('parses a successful result', async () => {
     const xml = await loadFixture('successful');
-    const result = await processCatchXml(makeResult(xml));
+    const result = await processCatchXml(makeResult(xml) as TestCaseResult);
     expect(result.name).toEqual(NAME);
     expect(result.success).toEqual(true);
     expect(result.weight).toEqual(1);
