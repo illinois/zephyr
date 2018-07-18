@@ -1,29 +1,25 @@
-import { GraderResult, Score } from "./types";
-
-export default (result: GraderResult): Score => {
-  const score: Score = {
-    weight: 0,
-    earned: 0,
+export default (results: TestCase[]): Score => {
+  const score = {
+    totalWeight: 0,
+    totalEarned: 0,
     extraCredit: 0,
-    pct: 0,
-    pct100: '0%',
-    errors: result.errors
-  };
+    score: 0,
+  } as Score;
 
-  result.testCases.forEach((testCase) => {
-    score.weight += testCase.weight;
+  results.forEach((testCase) => {
+    score.totalWeight += testCase.weight;
     if (testCase.success) {
-      score.earned += testCase.weight;
+      score.totalEarned += testCase.weight;
     }
     if (testCase.extraCredit) {
       score.extraCredit += testCase.extraCredit;
     }
   });
 
-  if (score.weight > 0) {
-    score.pct = score.earned / score.weight;
+  if (score.totalWeight > 0) {
+    score.score = score.totalEarned / score.totalWeight;
+    score.scorePercent = (score.score * 100).toFixed(2);
   }
-  score.pct100 = (score.pct * 100).toFixed(2);
 
   return score;
 };

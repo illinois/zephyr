@@ -8,9 +8,8 @@ const courseConfig = require('./load-course-config')();
 import checkout from './checkout';
 import grader from './grader';
 import * as slack from './slack';
-import { Options, GraderResult, AssignmentConfig, TestCaseResult } from './types';
 
-export default async (options: Options, assignmentConfig: AssignmentConfig, netid: string) => {
+export default async (options: Options, assignmentConfig: AssignmentConfig, netid: string): Promise<GraderResult> => {
   const result: GraderResult = {
     netid: netid,
     timestamp: options.timestamp

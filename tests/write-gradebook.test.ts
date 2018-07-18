@@ -1,7 +1,6 @@
 /* eslint-env jest */
 import mockFsControl, { mock as fs } from 'jest-plugin-fs';
 import writeGradebook from '../src/write-gradebook';
-import { Gradebook, CourseConfig, Options, Score } from '../src/types';
 
 jest.mock('fs', () => require('jest-plugin-fs/mock'));
 jest.mock('../src/octokit', () => {
@@ -28,7 +27,7 @@ afterEach(() => {
 
 const makeGradebook = (extra = {}): Gradebook => ({
   'nwalter2': {
-    pct100: '70',
+    score: 0.7,
     extraCredit: 2,
     ...extra
   } as Score,

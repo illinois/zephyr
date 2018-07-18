@@ -1,7 +1,7 @@
 import { promisify } from 'util';
-const xml2js = promisify(require('xml2js').parseString);
+import deasync from 'deasync';
+const xml2js = deasync(require('xml2js').parseString);
 import validator from 'validator';
-import { TestCaseResult, TestCase } from './types';
 
 function formatExpression(json: any) {
   const original = json[0]['Original'][0].trim();
@@ -10,11 +10,11 @@ function formatExpression(json: any) {
   return `Original: ${original}\nExpanded: ${expanded}`;
 }
 
-export default async (result: TestCaseResult): Promise<TestCase> => {
+export default (result: TestCaseResult): TestCase => {
   const xml = result.stdout;
   let catchJSON;
   try {
-    catchJSON = await xml2js(xml);
+    catchJSON = xml2js(xml);
   } catch (e) {
     console.error(e);
     return {
@@ -69,7 +69,6 @@ export default async (result: TestCaseResult): Promise<TestCase> => {
   // Complete test case
   return {
     name: result.name,
-    // tags: result.tags,
     success: success,
     weight: result.tags.weight,
     earned: (success) ? result.tags.weight : 0,

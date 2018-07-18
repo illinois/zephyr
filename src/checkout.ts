@@ -5,7 +5,6 @@ import rp from 'request-promise-native';
 import Octokit from './octokit';
 import moment from 'moment';
 import Github from '@octokit/rest';
-import { StudentFile, CheckoutOptions } from './types';
 
 interface CheckoutContext {
   org: string,

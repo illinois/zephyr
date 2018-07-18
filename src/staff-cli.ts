@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+import 'babel-polyfill';
 require('dotenv').load();
 import fs from 'fs-extra';
 const debug = require('debug')('zephyr:cli');
@@ -5,7 +8,6 @@ import path from 'path';
 import os from 'os';
 import grade from './grade';
 import generateReports from './generate-reports';
-import { Options } from './types';
 
 const argv: Options = require('yargs')
   .option('assignment', {

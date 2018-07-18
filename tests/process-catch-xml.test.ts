@@ -3,7 +3,6 @@ import path from 'path';
 import { promisify } from 'util';
 const readFile = promisify(require('fs-extra').readFile);
 import processCatchXml from '../src/process-catch-xml';
-import { TestCase, TestCaseResult } from '../src/types';
 
 const NAME = 'process-catch-xml-test';
 

@@ -2,12 +2,15 @@
   "name": "zephyr",
   "version": "1.0.0",
   "description": "A grading platform for CS 225",
-  "main": "index.js",
+  "bin": {
+    "zephyr": "./lib/student-cli.js",
+    "zephyr-staff": "./lib/staff-cli.js"
+  },
   "scripts": {
     "test": "jest --coverage",
     "lint": "eslint src",
     "lint-fix": "eslint --fix src",
-    "build": "babel src --out-dir lib --extensions \".js,.ts,.tsx\"",
+    "build": "babel src --out-dir lib --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
     "type-check": "tsc --noEmit"
   },
@@ -23,8 +26,10 @@
   "homepage": "https://github.com/nwalters512/zephyr#readme",
   "dependencies": {
     "@octokit/rest": "^15.9.4",
+    "babel-polyfill": "^6.26.0",
     "chalk": "^2.4.1",
     "csv-stringify": "^3.1.1",
+    "deasync": "^0.1.13",
     "debug": "^3.1.0",
     "dotenv": "^6.0.0",
     "fs-extra": "^6.0.1",
@@ -37,6 +42,7 @@
     "ora": "^2.1.0",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.5",
+    "rxjs": "^6.2.2",
     "simpl-schema": "^1.5.0",
     "tmp-promise": "^1.0.5",
     "validator": "^10.4.0",
@@ -50,6 +56,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.54",
     "@babel/preset-env": "^7.0.0-beta.54",
     "@babel/preset-typescript": "^7.0.0-beta.54",
+    "@types/deasync": "^0.1.0",
     "@types/fs-extra": "^5.0.4",
     "@types/handlebars": "^4.0.38",
     "@types/jest": "^23.3.0",

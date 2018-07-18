@@ -11,7 +11,6 @@ import gradeStudent from './grade-student';
 import processCatchResults from './process-catch-results';
 import computeScore from './compute-score';
 import * as slack from './slack';
-import { Options, Gradebook, StudentGraderResults } from './types';
 
 export default async (options: Options): Promise<StudentGraderResults> => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);

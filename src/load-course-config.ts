@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import SimpleSchema from 'simpl-schema';
-import { CourseConfig } from './types';
 
 // We'll cache the loaded config here
 let config: CourseConfig | null = null;

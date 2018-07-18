@@ -1,5 +1,3 @@
-import { AssignmentConfig, Options, StudentFile } from "./types";
-
 import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'js-yaml';
@@ -27,9 +25,7 @@ export default async function(options: Options, assignmentPath: string): Promise
     assignmentPath: assignmentPath,
   };
 
-  //
   // Import global config options:
-  //
   if (assignmentInfo.autograder.base) {
     const p = path.join(assignmentPath, assignmentInfo.autograder.base);
     assignmentConfig.baseFilePaths.push(p);

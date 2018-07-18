@@ -9,7 +9,6 @@ const octokit = require('./octokit')();
 import computeScore from './compute-score';
 import writeGradebook from './write-gradebook';
 import processCatch from './process-catch-results';
-import { GraderResult, StudentGraderResults, Options, Gradebook } from './types';
 
 const studentReportTemplatePath = path.join(__dirname, 'templates', 'student-report.hbs');
 const studentReportTemplate = handlebars.compile(fs.readFileSync(studentReportTemplatePath, 'utf8'));
@@ -30,7 +29,7 @@ const generateReportHtml = exports.generateReportHtml = async function(result: G
 
   if (!result.success) {
     output.succeeded = false;
-    if (result.errors.length == 1 && result.errors[0].includes('"Not Found"')) {
+    if (result.errors && result.errors.length == 1 && result.errors[0].includes('"Not Found"')) {
       result.errors = [ 'You made no submissions for this assignment as of this grading report.' ];
     }
 
@@ -38,11 +37,11 @@ const generateReportHtml = exports.generateReportHtml = async function(result: G
   } else {
     output.succeeded = true;
 
-    const score = computeScore(result);
-    output.earnedWeight = output.points = score.earned;
-    output.totalWeight = output.max_points = score.weight;
+    const score = computeScore(result.testCases);
+    output.earnedWeight = output.points = score.totalEarned;
+    output.totalWeight = output.max_points = score.totalWeight;
     output.extraCredit = score.extraCredit;
-    output.score = score.pct100;
+    output.score = (score.score * 100).toFixed(2);
   }
 
   return studentReportTemplate(output);
@@ -58,7 +57,7 @@ export default async function(results: StudentGraderResults, options: Options): 
     const netid = keys[i];
     const result = results[netid];
 
-    const score = computeScore(result);
+    const score = computeScore(result.testCases);
     const html = await generateReportHtml(result);
 
     // Store file to disk

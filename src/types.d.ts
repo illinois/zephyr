@@ -1,13 +1,11 @@
-export interface Score {
-  weight: number,
-  earned: number,
+interface Score {
+  totalWeight: number,
+  totalEarned: number,
   extraCredit: number,
-  pct: number,
-  pct100: string,
-  errors?: Array<string>
+  score: number,
 }
 
-export interface GraderResult {
+interface GraderResult {
   netid: string,
   timestamp: string,
   sha: string,
@@ -17,11 +15,11 @@ export interface GraderResult {
   errors?: Array<string>,
 }
 
-export interface StudentGraderResults {
+interface StudentGraderResults {
   [netid: string]: GraderResult,
 }
 
-export interface TestCase {
+interface TestCase {
   name: string,
   success: boolean,
   weight: number,
@@ -31,13 +29,13 @@ export interface TestCase {
   message?: string,
 }
 
-export interface RepoConfig {
+interface RepoConfig {
   host: string,
   org: string,
   repo?: string
 }
 
-export interface CourseConfig {
+interface CourseConfig {
   assignments: RepoConfig,
   submissions: RepoConfig,
   grades: RepoConfig,
@@ -45,14 +43,14 @@ export interface CourseConfig {
   roster: Array<string>
 }
 
-export interface AssignmentConfig {
+interface AssignmentConfig {
   studentFiles: StudentFile[],
   baseFilePaths: string[],
   exportFiles: string[],
   assignmentPath: string,
 }
 
-export interface Options {
+interface Options {
   graded: boolean,
   assignment: string,
   run: string,
@@ -68,12 +66,12 @@ export interface Options {
   ref: string,
 }
 
-export interface StudentFile {
+interface StudentFile {
   name: string,
   required: boolean,
 }
 
-export interface CheckoutOptions {
+interface CheckoutOptions {
   org: string,
   repo: string,
   repoPath: string,
@@ -83,20 +81,20 @@ export interface CheckoutOptions {
   timestamp?: string,
 }
 
-export interface GraderOptions {
+interface GraderOptions {
   cwd: string,
   execCommand?: string,
 }
 
-export interface Gradebook {
+interface Gradebook {
   [netid: string]: Score
 }
 
-export interface TestCaseTags {
+interface TestCaseTags {
   [name: string]: any
 }
 
-export interface TestCaseResult {
+interface TestCaseResult {
   name: string,
   tags: TestCaseTags,
   exitCode?: number | null,
@@ -104,5 +102,12 @@ export interface TestCaseResult {
   error?: any,
   stdout?: string,
   stderr?: string,
+}
+
+type GraderProgressEventType = 'start' | 'finish';
+
+interface GraderProgress {
+  event: GraderProgressEventType,
+  data: any,
 }
 

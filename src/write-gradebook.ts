@@ -3,19 +3,17 @@ import { promisify } from 'util';
 import path from 'path';
 const debug = require('debug')('zephyr:output-formatter');
 import octokit from './octokit';
-import { Score, Gradebook, CourseConfig, Options } from './types';
 const csvStringify = promisify(require('csv-stringify'));
 
 export default async function(gradebook: Gradebook, courseConfig: CourseConfig, options: Options) {
   const csvRows: (string|number)[][] = [];
 
   // Headers
-  csvRows.push(['netid', 'score', 'error', 'ec']);
+  csvRows.push(['netid', 'score', 'ec']);
 
   Object.keys(gradebook).forEach(netid => {
-    const { pct100, errors, extraCredit } = gradebook[netid];
-    const joinedErrors = (errors || []).join(';');
-    csvRows.push([netid, pct100, joinedErrors, extraCredit]);
+    const { score, extraCredit } = gradebook[netid];
+    csvRows.push([netid, (score * 100).toFixed(2), extraCredit]);
   });
 
   const csv = await csvStringify(csvRows);

@@ -3,7 +3,6 @@ import path from 'path';
 import { withDir } from 'tmp-promise';
 import MergeTrees from 'merge-trees';
 import grader from '../src/grader';
-import { TestCaseResult } from '../src/types';
 
 const TEST_TIMEOUT = 15000; // 15 seconds
 

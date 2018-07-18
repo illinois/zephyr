@@ -1,6 +1,5 @@
-import { TestCaseResult, GraderOptions } from "./types";
-
 import { spawn, ChildProcess, SpawnSyncOptions } from 'child_process';
+import { Subject } from '../node_modules/rxjs';
 
 type SpawnError = {
   code: string,
@@ -71,7 +70,7 @@ const spawnAsync = async (command: string, args?: ReadonlyArray<string>, options
   });
 };
 
-export default async (options: GraderOptions): Promise<Array<TestCaseResult>> => {
+export default async (options: GraderOptions, progressObservable?: Subject<GraderProgress>): Promise<Array<TestCaseResult>> => {
   const { cwd, execCommand = './test' } = options;
   const results: TestCaseResult[] = [];
   const recordResult = (testCase: TestCase, p: SpawnResult) => {
@@ -96,6 +95,10 @@ export default async (options: GraderOptions): Promise<Array<TestCaseResult>> =>
     }
 
     results.push(result);
+    progressObservable && progressObservable.next({
+      event: 'finish',
+      data: result
+    });
   };
 
   // Run `make`
@@ -155,6 +158,10 @@ export default async (options: GraderOptions): Promise<Array<TestCaseResult>> =>
 
     // Run the test cases
     for (const testCase of testCases) {
+      progressObservable && progressObservable.next({
+        event: 'start',
+        data: testCase,
+      });
       const opts = {
         cwd,
         asdf: 'asdf',
