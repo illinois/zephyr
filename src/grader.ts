@@ -180,5 +180,7 @@ export default async (options: GraderOptions, progressObservable?: Subject<Grade
     }
   }
 
+  progressObservable && progressObservable.complete()
+
   return results;
 };

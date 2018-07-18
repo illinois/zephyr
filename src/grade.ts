@@ -80,9 +80,9 @@ export default async (options: Options): Promise<StudentGraderResults> => {
     fs.writeFileSync(outputFile, JSON.stringify(result));
     autograderResults[netid] = result;
 
-    const grade = computeScore(result);
+    const grade = computeScore(result.testCases);
     if (result.success) {
-      spinner.succeed(`Graded ${netid}: ${grade.pct100}%`);
+      spinner.succeed(`Graded ${netid}: ${(grade.score * 100).toFixed()}%`);
     } else {
       spinner.fail(`Could not grade submission from ${netid}`);
     }
