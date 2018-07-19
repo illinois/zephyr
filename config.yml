@@ -1,17 +1,17 @@
 assignments:
   host: github-dev.cs.illinois.edu
-  org: cs225-staff
+  owner: cs225-staff
   repo: assignments
 submissions:
   host: github-dev.cs.illinois.edu
-  org: cs225sp18
+  owner: cs225sp18
 grades:
   host: github-dev.cs.illinois.edu
-  org: cs225-staff
+  owner: cs225-staff
   repo: sp18-autograder-grades
 feedback:
   host: github-dev.cs.illinois.edu
-  org: cs225-staff
+  owner: cs225-staff
   repo: sp18-studentFeedback
 roster:
   - abhaymv2

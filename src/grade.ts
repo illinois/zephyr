@@ -27,8 +27,7 @@ export default async (options: IOptions): Promise<IStudentGraderResults> => {
     debug(`Using local assignment root ${options.assignmentRoot}...`);
     assignmentDir = path.join(options.assignmentRoot, options.assignment);
   } else {
-    const spinner = ora(`Fetching ${options.assignment} from git`).start();
-    // console.log(`Fetching ${options.assignment} from git...`);
+    const spinner = ora(`Fetching ${options.assignment} from GitHub`).start();
     assignmentTmpDir = tmp.dirSync({ unsafeCleanup: options.cleanup });
     assignmentDir = assignmentTmpDir.name;
     await checkout({
@@ -87,7 +86,7 @@ export default async (options: IOptions): Promise<IStudentGraderResults> => {
 
     const grade = computeScore(result.testCases);
     if (result.success) {
-      spinner.succeed(`Graded ${netid}: ${(grade.score * 100).toFixed()}%`);
+      spinner.succeed(`Graded ${netid}: ${(grade.score * 100).toFixed(2)}%`);
     } else {
       spinner.fail(`Could not grade submission from ${netid}`);
     }

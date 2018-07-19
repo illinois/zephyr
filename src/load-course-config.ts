@@ -9,7 +9,7 @@ const makeGithubSchema = (name: string, repo = true): any => {
   const githubSchema = {
     [name]: Object,
     [`${name}.host`]: String,
-    [`${name}.org`]: String,
+    [`${name}.owner`]: String,
   };
   if (repo) { githubSchema[`${name}.repo`] = String; }
   return githubSchema;
