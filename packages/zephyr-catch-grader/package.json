@@ -1,0 +1,52 @@
+{
+  "name": "@illinois/zephyr-catch-grader",
+  "version": "1.0.0",
+  "description": "A Zephyr grader for a Catch test suite",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "fix-lint": "npm run lint -- --fix",
+    "build": "babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
+    "build:watch": "npm run build -- --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "illinois",
+    "zephyr",
+    "autograder"
+  ],
+  "author": "Nathan Walters",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.54",
+    "rxjs": "^6.2.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.54",
+    "@babel/core": "^7.0.0-beta.54",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.54",
+    "@babel/plugin-transform-runtime": "^7.0.0-beta.54",
+    "@babel/preset-env": "^7.0.0-beta.54",
+    "@babel/preset-typescript": "^7.0.0-beta.54",
+    "jest": "^23.4.1",
+    "ts-jest": "^23.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

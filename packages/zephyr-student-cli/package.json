@@ -1,0 +1,32 @@
+{
+  "name": "@illinois/zephyr-student-cli",
+  "version": "1.0.0",
+  "description": "A CLI for zephyr for use by students",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "fix-lint": "npm run lint -- --fix",
+    "build": "babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
+    "build:watch": "npm run build -- --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "illinois",
+    "autograder"
+  ],
+  "author": "Nathan Walters",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.54",
+    "@babel/core": "^7.0.0-beta.54",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.54",
+    "@babel/plugin-transform-runtime": "^7.0.0-beta.54",
+    "@babel/preset-env": "^7.0.0-beta.54",
+    "@babel/preset-typescript": "^7.0.0-beta.54",
+    "ts-jest": "^23.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
+  }
+}

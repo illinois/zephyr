@@ -7,12 +7,7 @@
     "zephyr-staff": "./lib/staff-cli.js"
   },
   "scripts": {
-    "test": "jest --coverage",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'",
-    "fix-lint": "npm run lint -- --fix",
-    "build": "babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
-    "build:watch": "npm run build -- --watch",
-    "type-check": "tsc --noEmit"
+    "postinstall": "lerna bootstrap --hoist"
   },
   "repository": {
     "type": "git",
@@ -71,6 +66,7 @@
     "@types/xml2js": "^0.4.3",
     "@types/yargs": "^11.1.0",
     "eslint": "^5.1.0",
+    "lerna": "^2.11.0",
     "ts-jest": "^23.0.1",
     "typescript": "^2.9.2"
   },

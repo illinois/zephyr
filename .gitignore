@@ -61,7 +61,7 @@ typings/
 .next
 
 # built files
-/lib
+lib/
 
 # autograder results
 out/

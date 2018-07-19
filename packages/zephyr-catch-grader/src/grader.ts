@@ -1,5 +1,5 @@
 import { ChildProcess, spawn, SpawnSyncOptions } from 'child_process';
-import { Subject } from '../node_modules/rxjs';
+import { Subject } from 'rxjs';
 
 type SpawnError = {
   code: string,
