@@ -1,25 +1,27 @@
+import Github from '@octokit/rest';
+import Debug from 'debug';
 import fs from 'fs-extra';
+import moment from 'moment';
 import path from 'path';
-const debug = require('debug')('zephyr:checkout');
 import rp from 'request-promise-native';
 import Octokit from './octokit';
-import moment from 'moment';
-import Github from '@octokit/rest';
 
-interface CheckoutContext {
-  org: string,
-  repo: string,
-  ref: string,
-  octokit: Github,
-  files?: string[],
+const debug = Debug('zephyr:checkout');
+
+interface ICheckoutContext {
+  owner: string;
+  repo: string;
+  ref: string;
+  octokit: Github;
+  files?: string[];
 }
 
-interface GithubFile {
-  name: string,
-  size: number,
-  type: 'file' | 'dir',
-  path: string,
-  download_url: string,
+interface IGithubFile {
+  name: string;
+  size: number;
+  type: 'file' | 'dir';
+  path: string;
+  download_url: string;
 }
 
 const doDownload = async (downloadUrl: string, checkoutPath: string) => {
@@ -30,54 +32,54 @@ const doDownload = async (downloadUrl: string, checkoutPath: string) => {
 };
 
 // If the files list is empty, we always need this file/directory
-const needsFile = (path: string, files?: string[]) => !files || files.some(f => f == path);
-const needsDirectory = (path: string, files?: string[]) => !files || files.some(f => f.startsWith(path));
+const needsFile = (filePath: string, files?: string[]) => !files || files.some((f) => f === filePath);
+const needsDirectory = (filePath: string, files?: string[]) => !files || files.some((f) => f.startsWith(filePath));
 
-const fetchDirectory = async (repoPath: string, checkoutPath: string, context: CheckoutContext) => {
+const fetchDirectory = async (repoPath: string, checkoutPath: string, context: ICheckoutContext) => {
   const { files } = context;
   const res = await context.octokit.repos.getContent({
-    owner: context.org,
+    owner: context.owner,
     repo: context.repo,
     path: repoPath,
     ref: context.ref,
   });
 
-  const promises = res.data.map((d: GithubFile) => {
-    if (d.type == 'file' && d.size > 0) {
+  const promises = res.data.map((d: IGithubFile) => {
+    if (d.type === 'file' && d.size > 0) {
       // standard file
       if (needsFile(d.path, files)) {
         return doDownload(d.download_url, path.join(checkoutPath, d.name));
       }
-    } else if (d.type == 'file' && d.size == 0) {
+    } else if (d.type === 'file' && d.size === 0) {
       // submodule? ignore for now
-    } else if (d.type == 'dir') {
+    } else if (d.type === 'dir') {
       if (needsDirectory(d.path, files)) {
         return fetchDirectory(d.path, path.join(checkoutPath, d.name), context);
       }
     } else {
-      console.error(`Unknown git response: ${d}`);
+      throw new Error(`Unknown git response: ${d}`);
     }
   });
   await Promise.all(promises);
 };
 
-const fetchMasterSha = async (context: CheckoutContext) => {
+const fetchMasterSha = async (context: ICheckoutContext) => {
   debug(`Fetching SHA of master for ${context.repo}`);
 
   const res = await context.octokit.gitdata.getReference({
-    owner: context.org,
+    owner: context.owner,
     repo: context.repo,
     ref: 'heads/master',
   });
   return res.data.object.sha;
 };
 
-const fetchTimestampedSha = async (timestamp: string, context: CheckoutContext) => {
+const fetchTimestampedSha = async (timestamp: string, context: ICheckoutContext) => {
   const commits = await context.octokit.repos.getCommits({
-    owner: context.org,
+    owner: context.owner,
     repo: context.repo,
     per_page: 100,
-    until: moment(timestamp).toISOString()
+    until: moment(timestamp).toISOString(),
   });
 
   return commits.data[0].sha;
@@ -85,12 +87,12 @@ const fetchTimestampedSha = async (timestamp: string, context: CheckoutContext) 
 
 export default async (options: CheckoutOptions) => {
   const { ref, repoPath, files, checkoutPath, timestamp, ...rest } = options;
-  const checkoutContext: CheckoutContext = {
+  const checkoutContext: ICheckoutContext = {
     octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
     files: files && files.map((f: StudentFile) => path.join(repoPath, f.name)),
     ...rest,
-  } as CheckoutContext;
+  } as ICheckoutContext;
 
   if (ref) {
     checkoutContext.ref = ref;

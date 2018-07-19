@@ -2,17 +2,18 @@ import rp from 'request-promise-native';
 
 let enabled = false;
 
-type SendMessage = (prefix?: string) => (message: string, attachment?: string) => void;
-const sendMessage: SendMessage = (prefix = '') => (message, attachment = undefined) => {
-  if (!enabled) return;
+type SendMessage = (prefix?: string) => (msg: string, attachment?: string) => void;
+
+const sendMessage: SendMessage = (prefix = '') => (msg: string, attachment = undefined) => {
+  if (!enabled) { return; }
   rp({
     method: 'POST',
     uri: 'https://hooks.slack.com/services/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',
     body: {
-      text: `${prefix} ${message}`,
+      text: `${prefix} ${msg}`,
       attachments: attachment && [{ text: attachment }],
     },
-    json: true
+    json: true,
   });
 };
 

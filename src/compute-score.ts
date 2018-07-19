@@ -18,7 +18,6 @@ export default (results: TestCase[]): Score => {
 
   if (score.totalWeight > 0) {
     score.score = score.totalEarned / score.totalWeight;
-    score.scorePercent = (score.score * 100).toFixed(2);
   }
 
   return score;

@@ -1,22 +1,22 @@
 /* eslint-env jest */
+import MergeTrees from 'merge-trees';
 import path from 'path';
 import { withDir } from 'tmp-promise';
-import MergeTrees from 'merge-trees';
 import grader from '../src/grader';
 
 const TEST_TIMEOUT = 15000; // 15 seconds
 
 const getFixtureDirectory = (name: string) => path.join(__dirname, '__fixtures__', 'grader', name);
 
-const withTestFixture = (name: string, fn: (results: Array<TestCaseResult>) => any) => {
-  return withDir(async ({ path }) => {
+const withTestFixture = (name: string, fn: (results: ITestCaseResult[]) => any) => {
+  return withDir(async ({ path: destPath }) => {
     const mergeTrees = new MergeTrees(
       [getFixtureDirectory('base'), getFixtureDirectory(name)],
-      path,
-      { overwrite: true }
+      destPath,
+      { overwrite: true },
     );
     mergeTrees.merge();
-    const options = { cwd: path };
+    const options = { cwd: destPath };
     const results = await grader(options);
     fn(results);
   }, { unsafeCleanup: true });
@@ -26,7 +26,7 @@ describe('grader', () => {
   it('grades successful code with one test case', async () => {
     await withTestFixture('passing', (results) => {
       expect(results.length).toBe(2);
-      results.forEach(result => expect(result.exitCode).toBe(0));
+      results.forEach((result) => expect(result.exitCode).toBe(0));
 
       // Make phase
       expect(results[0].name).toEqual('make');

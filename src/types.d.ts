@@ -1,113 +1,113 @@
-interface Score {
-  totalWeight: number,
-  totalEarned: number,
-  extraCredit: number,
-  score: number,
+interface IScore {
+  totalWeight: number;
+  totalEarned: number;
+  extraCredit: number;
+  score: number;
 }
 
-interface GraderResult {
-  netid: string,
-  timestamp: string,
-  sha: string,
-  success: boolean,
-  testCases: Array<TestCase>,
-  testCaseResults: Array<TestCaseResult>
-  errors?: Array<string>,
+interface IGraderResult {
+  netid: string;
+  timestamp: string;
+  sha: string;
+  success: boolean;
+  testCases: ITestCase[];
+  testCaseResults: ITestCaseResult[];
+  errors?: string[];
 }
 
-interface StudentGraderResults {
-  [netid: string]: GraderResult,
+interface IStudentGraderResults {
+  [netid: string]: IGraderResult;
 }
 
-interface TestCase {
-  name: string,
-  success: boolean,
-  weight: number,
-  earned: number,
-  extraCredit?: number,
-  output?: string,
-  message?: string,
+interface ITestCase {
+  name: string;
+  success: boolean;
+  weight: number;
+  earned: number;
+  extraCredit?: number;
+  output?: string;
+  message?: string;
 }
 
-interface RepoConfig {
-  host: string,
-  org: string,
-  repo?: string
+interface IGithubConfig {
+  host: string;
+  owner: string;
 }
 
-interface CourseConfig {
-  assignments: RepoConfig,
-  submissions: RepoConfig,
-  grades: RepoConfig,
-  feedback: RepoConfig,
-  roster: Array<string>
+interface IRepoConfig extends IGithubConfig {
+  repo: string;
 }
 
-interface AssignmentConfig {
-  studentFiles: StudentFile[],
-  baseFilePaths: string[],
-  exportFiles: string[],
-  assignmentPath: string,
+interface ICourseConfig {
+  assignments: IRepoConfig;
+  submissions: IGithubConfig;
+  grades: IRepoConfig;
+  feedback: IRepoConfig;
+  roster: string[];
 }
 
-interface Options {
-  graded: boolean,
-  assignment: string,
-  run: string,
-  id: string,
-  assignmentRoot: string,
-  cleanup: boolean,
-  netid?: string,
-  ['run-one']: boolean,
-  ['skip-ews-check']: boolean,
-  resume: boolean,
-  outputPath: string,
-  timestamp: string,
-  ref: string,
+interface IAssignmentConfig {
+  studentFiles: IStudentFile[];
+  baseFilePaths: string[];
+  exportFiles: string[];
+  assignmentPath: string;
 }
 
-interface StudentFile {
-  name: string,
-  required: boolean,
+interface IOptions {
+  graded: boolean;
+  assignment: string;
+  run: string;
+  id: string;
+  assignmentRoot: string;
+  cleanup: boolean;
+  netid?: string;
+  ['run-one']: boolean;
+  ['skip-ews-check']: boolean;
+  resume: boolean;
+  outputPath: string;
+  timestamp: string;
+  ref: string;
 }
 
-interface CheckoutOptions {
-  org: string,
-  repo: string,
-  repoPath: string,
-  checkoutPath: string,
-  files?: StudentFile[],
-  ref?: string,
-  timestamp?: string,
+interface IStudentFile {
+  name: string;
+  required: boolean;
 }
 
-interface GraderOptions {
-  cwd: string,
-  execCommand?: string,
+interface ICheckoutOptions {
+  owner: string;
+  repo: string;
+  repoPath: string;
+  checkoutPath: string;
+  files?: IStudentFile[];
+  ref?: string;
+  timestamp?: string;
 }
 
-interface Gradebook {
-  [netid: string]: Score
+interface IGraderOptions {
+  cwd: string;
+  execCommand?: string;
 }
 
-interface TestCaseTags {
-  [name: string]: any
+interface IGradebook {
+  [netid: string]: IScore;
 }
 
-interface TestCaseResult {
-  name: string,
-  tags: TestCaseTags,
-  exitCode?: number | null,
-  signal?: string,
-  error?: any,
-  stdout?: string,
-  stderr?: string,
+interface ITestCaseResult {
+  name: string;
+  tags: {
+    [name: string]: any;
+  };
+  exitCode?: number | null;
+  signal?: string;
+  error?: any;
+  stdout?: string;
+  stderr?: string;
 }
 
 type GraderProgressEventType = 'start' | 'finish';
 
-interface GraderProgress {
-  event: GraderProgressEventType,
-  data: any,
+interface IGraderProgress {
+  event: GraderProgressEventType;
+  data: any;
 }
-

@@ -1,12 +1,16 @@
 /* eslint-env jest */
+import { readFile } from 'fs-extra';
 import path from 'path';
 import { promisify } from 'util';
-const readFile = promisify(require('fs-extra').readFile);
+const readFileAsync = promisify<string, any, string>(readFile);
 import processCatchXml from '../src/process-catch-xml';
 
 const NAME = 'process-catch-xml-test';
 
-const loadFixture = (name: string) => readFile(path.join(__dirname, '__fixtures__', 'process-catch-xml', `${name}.xml`));
+const fixturesPath = path.join(__dirname, '__fixtures__', 'process-catch-xml');
+const loadFixture = async (name: string): Promise<string> => {
+  return readFileAsync(path.join(fixturesPath, `${name}.xml`), { encoding: 'utf8' });
+};
 
 const makeResult = (xml: string) => ({
   name: NAME,

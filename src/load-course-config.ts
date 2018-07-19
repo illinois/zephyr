@@ -5,14 +5,14 @@ import SimpleSchema from 'simpl-schema';
 // We'll cache the loaded config here
 let config: CourseConfig | null = null;
 
-const makeGithubSchema = (name: string, repo = true) => {
-  const schema = {
+const makeGithubSchema = (name: string, repo = true): any => {
+  const githubSchema = {
     [name]: Object,
     [`${name}.host`]: String,
     [`${name}.org`]: String,
   };
-  if (repo) schema[`${name}.repo`] = String;
-  return schema;
+  if (repo) { githubSchema[`${name}.repo`] = String; }
+  return githubSchema;
 };
 
 const schema = new SimpleSchema({
@@ -20,7 +20,7 @@ const schema = new SimpleSchema({
   ...makeGithubSchema('submissions', false),
   ...makeGithubSchema('grades'),
   ...makeGithubSchema('feedback'),
-  'roster': [String],
+  roster: [String],
 });
 
 export default function(): CourseConfig {
@@ -36,4 +36,4 @@ export default function(): CourseConfig {
   }
 
   return config as CourseConfig;
-};
+}

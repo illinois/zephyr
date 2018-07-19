@@ -1,7 +1,7 @@
 declare module 'merge-trees' {
     class MergeTrees {
-      constructor(srcDirs: Array<string>, destDir: string, opts?: any)
-      merge(): void
+      constructor(srcDirs: string[], destDir: string, opts?: any)
+      public merge(): void;
     }
     export = MergeTrees;
   }

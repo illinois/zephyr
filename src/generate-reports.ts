@@ -1,19 +1,20 @@
+import Debug from 'debug';
 import fs from 'fs-extra';
-import path from 'path';
 import moment from 'moment';
-const debug = require('debug')('zephyr:output-formatter');
+import path from 'path';
+const debug = Debug('zephyr:output-formatter');
 import handlebars from 'handlebars';
 
-const courseConfig = require('./load-course-config')();
-const octokit = require('./octokit')();
 import computeScore from './compute-score';
-import writeGradebook from './write-gradebook';
+import loadCourseConfig from './load-course-config';
+import Octokit from './octokit';
 import processCatch from './process-catch-results';
+import writeGradebook from './write-gradebook';
 
 const studentReportTemplatePath = path.join(__dirname, 'templates', 'student-report.hbs');
 const studentReportTemplate = handlebars.compile(fs.readFileSync(studentReportTemplatePath, 'utf8'));
 
-const generateReportHtml = exports.generateReportHtml = async function(result: GraderResult) {
+const generateReportHtml = exports.generateReportHtml = async (result: GraderResult) => {
   // If there's any catch data, process it
   if (result.testCaseResults) {
     result.testCases = await processCatch(result.testCaseResults);
@@ -24,12 +25,12 @@ const generateReportHtml = exports.generateReportHtml = async function(result: G
     testCases: result.testCases,
     time: moment(result.timestamp).format('MMMM Do YYYY, h:mm:ss a'),
     sha: result.sha,
-    netid: result.netid
+    netid: result.netid,
   } as any;
 
   if (!result.success) {
     output.succeeded = false;
-    if (result.errors && result.errors.length == 1 && result.errors[0].includes('"Not Found"')) {
+    if (result.errors && result.errors.length === 1 && result.errors[0].includes('"Not Found"')) {
       result.errors = [ 'You made no submissions for this assignment as of this grading report.' ];
     }
 
@@ -50,11 +51,11 @@ const generateReportHtml = exports.generateReportHtml = async function(result: G
 export default async function(results: StudentGraderResults, options: Options): Promise<Gradebook> {
   const studentFeedbackDir = path.join(options.outputPath, 'studentFeedback');
   fs.ensureDirSync(studentFeedbackDir);
+  const courseConfig = loadCourseConfig();
 
   const gradebook: Gradebook = {};
-  const keys = Object.keys(results);
-  for (let i = 0; i < keys.length; i++) {
-    const netid = keys[i];
+  const netids = Object.keys(results);
+  for (const netid of netids) {
     const result = results[netid];
 
     const score = computeScore(result.testCases);
@@ -66,12 +67,12 @@ export default async function(results: StudentGraderResults, options: Options): 
 
     // Store file on git (graded runs)
     if (options.graded) {
-      await octokit.repos.createFile({
-        owner: courseConfig.feedback.owner,
-        repo: courseConfig.feedback.repo,
+      await Octokit().repos.createFile({
+        owner: courseConfig.feedback.owner as string,
+        repo: courseConfig.feedback.repo as string,
         path: path.join(options.id, `${netid  }.html`),
         message: 'autograder generated feedback file',
-        content: Buffer.from(html).toString('base64')
+        content: Buffer.from(html).toString('base64'),
       });
     }
 
@@ -80,4 +81,4 @@ export default async function(results: StudentGraderResults, options: Options): 
 
   await writeGradebook(gradebook, courseConfig, options);
   return gradebook;
-};
+}

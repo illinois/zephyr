@@ -1,74 +1,79 @@
 #!/usr/bin/env node
 
 import 'babel-polyfill';
-require('dotenv').load();
+import Debug from 'debug';
+import dotenv from 'dotenv';
 import fs from 'fs-extra';
-const debug = require('debug')('zephyr:cli');
-import path from 'path';
 import os from 'os';
-import grade from './grade';
+import path from 'path';
+import yargs from 'yargs';
 import generateReports from './generate-reports';
+import grade from './grade';
+import * as slack from './slack';
 
-const argv: Options = require('yargs')
+dotenv.load();
+const debug = Debug('zephyr:staff-cli');
+
+const argv = yargs
   .option('assignment', {
     describe: 'Assignment name',
-    demandOption: 'An assignment is required'
+    demandOption: 'An assignment is required',
   })
   .option('run', {
     describe: 'Specify the grading scheme to run',
-    required: true
+    required: true,
   })
   .option('assignment-root', {
     describe: 'Use a local assignment root instead of using git',
   })
   .option('output-path', {
     alias: 'o',
-    describe: 'Output path for grader output'
+    describe: 'Output path for grader output',
   })
   .option('run-one', {
     describe: 'Run only a single student (at random)',
     boolean: true,
-    default: false
+    default: false,
   })
   .option('netid', {
     describe: 'Run only a single student (given by netid)',
   })
   .option('timestamp', {
     alias: 't',
-    describe: 'Use code submissions made before a given time'
+    describe: 'Use code submissions made before a given time',
   })
   .option('ref', {
-    describe: 'Use a specific revision for grading'
+    describe: 'Use a specific revision for grading',
   })
   .option('resume', {
-    describe: 'Resume a previous grading run (skip if output exists)'
+    describe: 'Resume a previous grading run (skip if output exists)',
   })
   .option('id', {
-    describe: 'Provide a unique ID for this run (for files/logs)'
+    describe: 'Provide a unique ID for this run (for files/logs)',
   })
   .option('cleanup', {
     describe: 'Clean up temp files/directories',
     boolean: true,
-    default: undefined
+    default: undefined,
   })
   .option('graded', {
     describe: 'Run as a graded run',
     boolean: true,
-    default: false
+    default: false,
   })
   .option('assignments-ref', {
     describe: 'The commit/branch/tag of the assignments repo to pull from',
-    default: 'master'
+    default: 'master',
   })
   .option('skip-ews-check', {
     describe: 'Used to skip safety check to make sure grader is run on EWS.',
     boolean: true,
-    default: false
+    default: false,
   })
   .implies('graded', 'id')
   .implies('ref', 'netid')
   .help()
-  .argv;
+  .argv as any;
 
 // Let's validate some stuff
 const fatal = (msg: string, exitCode = 1) => {
@@ -84,7 +89,7 @@ if (!process.env.GHE_TOKEN) {
   fatal('You must provide a GitHub token via the GHE_TOKEN environment variable');
 }
 
-if (!argv['skip-ews-check'] && (process.platform != 'linux' || !os.hostname().includes('ews.illinois.edu'))) {
+if (!argv['skip-ews-check'] && (process.platform !== 'linux' || !os.hostname().includes('ews.illinois.edu'))) {
   fatal('You should be running the grader in an EWS Linux machine for '
         + 'actual grading.\n'
         + 'Even testing should be done on EWS, but if needed locally, '
@@ -110,16 +115,14 @@ if (argv.graded) {
   console.log(` * Run: ${argv.run}`);
   console.log();
 
-  require('./slack').enable();
+  slack.enable();
 }
-
 
 // ensure id exists
 if (!argv.id) {
   argv.id = `${argv.assignment}_${(new Date()).getTime()}`;
 }
 debug(`Run ID: ${argv.id}`);
-
 
 // output path
 if (!argv.outputPath) {
@@ -131,7 +134,7 @@ fs.ensureDirSync(argv.outputPath);
 (async () => {
   const results = await grade(argv);
   await generateReports(results, argv);
-})().catch(e => {
+})().catch((e) => {
   console.error(e);
   process.exit(1);
 });

@@ -10,7 +10,7 @@ export default (host: string = DEFAULT_HOST) => {
 
   octokit.authenticate({
     type: 'oauth',
-    token: process.env.GHE_TOKEN as string
+    token: process.env.GHE_TOKEN as string,
   });
 
   return octokit;

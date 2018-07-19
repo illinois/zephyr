@@ -1,19 +1,24 @@
+import Debug from 'debug';
 import fs from 'fs-extra';
+import ora from 'ora';
 import path from 'path';
 import tmp from 'tmp';
-const debug = require('debug')('zephyr:grade');
-import ora from 'ora';
 
-const courseConfig = require('./load-course-config')();
 import checkout from './checkout';
-import loadAssignmentConfig from './load-assignment-config';
-import gradeStudent from './grade-student';
-import processCatchResults from './process-catch-results';
 import computeScore from './compute-score';
+import gradeStudent from './grade-student';
+import loadAssignmentConfig from './load-assignment-config';
+import loadCourseConfig from './load-course-config';
+import processCatchResults from './process-catch-results';
 import * as slack from './slack';
+
+const debug = Debug('zephyr:grade');
 
 export default async (options: Options): Promise<StudentGraderResults> => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);
+
+  // Load configuration for the current course
+  const courseConfig = loadCourseConfig();
 
   // Fetch the assignment from git
   let assignmentDir: string;
@@ -29,7 +34,7 @@ export default async (options: Options): Promise<StudentGraderResults> => {
     await checkout({
       checkoutPath: assignmentDir,
       repoPath: options.assignment,
-      org: courseConfig.assignments.org,
+      owner: courseConfig.assignments.owner,
       repo: courseConfig.assignments.repo,
     });
     spinner.succeed();
@@ -76,8 +81,8 @@ export default async (options: Options): Promise<StudentGraderResults> => {
     const result = await gradeStudent(options, assignmentConfig, netid);
     result.testCases = await processCatchResults(result.testCaseResults);
 
-    const outputFile = path.join(options.outputPath, `${netid}.json`);
-    fs.writeFileSync(outputFile, JSON.stringify(result));
+    const outputFilee = path.join(options.outputPath, `${netid}.json`);
+    fs.writeFileSync(outputFilee, JSON.stringify(result));
     autograderResults[netid] = result;
 
     const grade = computeScore(result.testCases);

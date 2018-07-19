@@ -1,19 +1,24 @@
+import Debug from 'debug';
+const debug = Debug('zephyr:grade-student');
 import fs from 'fs-extra';
 import path from 'path';
 import tmp from 'tmp';
-const debug = require('debug')('zephyr:grade-student');
 
-import mergeIntoDirectory from './merge-into-directory';
-const courseConfig = require('./load-course-config')();
 import checkout from './checkout';
 import grader from './grader';
+import loadCourseConfig from './load-course-config';
+import mergeIntoDirectory from './merge-into-directory';
 import * as slack from './slack';
 
-export default async (options: Options, assignmentConfig: AssignmentConfig, netid: string): Promise<GraderResult> => {
-  const result: GraderResult = {
-    netid: netid,
-    timestamp: options.timestamp
-  } as GraderResult;
+export default async (
+  options: IOptions,
+  assignmentConfig: IAssignmentConfig,
+  netid: string,
+): Promise<IGraderResult> => {
+  const result: IGraderResult = {
+    netid,
+    timestamp: options.timestamp,
+  } as IGraderResult;
 
   // Create a temp folder to place all grader files into
   const tempPathObj = tmp.dirSync({ unsafeCleanup: options.cleanup });
@@ -23,13 +28,14 @@ export default async (options: Options, assignmentConfig: AssignmentConfig, neti
   // Fetch student files from GitHub
   const tempStudentFiles = tmp.dirSync({ unsafeCleanup: false });
   debug(`Fetching student files to ${tempStudentFiles.name}`);
+  const courseConfig = loadCourseConfig();
   try {
     const checkoutOptions = {
       repo: netid,
       repoPath: options.assignment,
       files: assignmentConfig.studentFiles,
       checkoutPath: tempStudentFiles.name,
-      org: courseConfig.submissions.org,
+      owner: courseConfig.submissions.owner,
       ref: options.ref,
     };
     result.sha = await checkout(checkoutOptions);
@@ -48,11 +54,11 @@ export default async (options: Options, assignmentConfig: AssignmentConfig, neti
     ...assignmentConfig.baseFilePaths,
     tempStudentFiles.name,
   ];
-  sourceDirectories.forEach(directory => mergeIntoDirectory(directory, tempPath));
+  sourceDirectories.forEach((directory) => mergeIntoDirectory(directory, tempPath));
 
   // Time to run some tests
   debug(`> Grading started: ${netid}`);
-  let testCaseResults: Array<TestCaseResult> = [];
+  let testCaseResults: ITestCaseResult[] = [];
   try {
     testCaseResults = await grader({ cwd: tempPath });
   } catch (e) {
@@ -64,7 +70,6 @@ export default async (options: Options, assignmentConfig: AssignmentConfig, neti
 
   // Export files:
   assignmentConfig.exportFiles.forEach((exportFileName) => {
-    console.log(exportFileName);
     const exportFilePath = path.join(tempPath, exportFileName);
     let exportSavePath = path.join(options.outputPath, 'export');
     fs.ensureDirSync(exportSavePath);

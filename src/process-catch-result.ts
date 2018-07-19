@@ -1,25 +1,25 @@
 import processCatchXML from './process-catch-xml';
 
-export default function (result: TestCaseResult): TestCase {
+export default function(result: TestCaseResult): TestCase {
     if (result.tags.make) {
       // Record `make` output:
       return {
         name: 'Output from `make`',
-        success: (result.exitCode == 0),
+        success: (result.exitCode === 0),
         weight: 0,
         earned: 0,
         output: result.stdout,
-        message: result.stderr
+        message: result.stderr,
       };
     } else if (result.tags.valgrind) {
       // Record `valgrind` output:
       return {
         name: result.name,
-        success: (result.exitCode == 0),
+        success: (result.exitCode === 0),
         weight: result.tags.weight,
-        earned: (result.exitCode == 0) ? result.tags.weight : 0,
+        earned: (result.exitCode === 0) ? result.tags.weight : 0,
         output: result.stdout,
-        message: result.stderr
+        message: result.stderr,
       };
     } else if (result.error) {
       let error;
@@ -37,7 +37,7 @@ export default function (result: TestCaseResult): TestCase {
         weight: result.tags.weight,
         earned: 0,
         output: error,
-        message: result.stderr
+        message: result.stderr,
       };
 
     } else {
@@ -53,4 +53,4 @@ export default function (result: TestCaseResult): TestCase {
       }
       return testCase;
     }
-};
+}

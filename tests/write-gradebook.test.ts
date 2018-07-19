@@ -26,11 +26,11 @@ afterEach(() => {
 });
 
 const makeGradebook = (extra = {}): Gradebook => ({
-  'nwalter2': {
+  nwalter2: {
     score: 0.7,
     extraCredit: 2,
-    ...extra
-  } as Score,
+    ...extra,
+  } as IScore,
 });
 
 const makeCourseConfig = () => ({
@@ -44,7 +44,7 @@ const makeOptions = (extra = {}) => ({
   outputPath: '/',
   id: 'testing',
   graded: false,
-  ...extra
+  ...extra,
 });
 
 describe('writeGradebook', () => {

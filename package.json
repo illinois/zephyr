@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "jest --coverage",
-    "lint": "eslint src",
-    "lint-fix": "eslint --fix src",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "fix-lint": "npm run lint -- --fix",
     "build": "babel src --out-dir lib --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
     "type-check": "tsc --noEmit"
@@ -45,6 +45,7 @@
     "rxjs": "^6.2.2",
     "simpl-schema": "^1.5.0",
     "tmp-promise": "^1.0.5",
+    "tslint": "^5.11.0",
     "validator": "^10.4.0",
     "xml2js": "^0.4.19",
     "yargs": "^12.0.1"
@@ -57,6 +58,8 @@
     "@babel/preset-env": "^7.0.0-beta.54",
     "@babel/preset-typescript": "^7.0.0-beta.54",
     "@types/deasync": "^0.1.0",
+    "@types/debug": "0.0.30",
+    "@types/dotenv": "^4.0.3",
     "@types/fs-extra": "^5.0.4",
     "@types/handlebars": "^4.0.38",
     "@types/jest": "^23.3.0",
@@ -65,6 +68,8 @@
     "@types/request-promise-native": "^1.0.15",
     "@types/tmp": "0.0.33",
     "@types/validator": "^9.4.1",
+    "@types/xml2js": "^0.4.3",
+    "@types/yargs": "^11.1.0",
     "eslint": "^5.1.0",
     "ts-jest": "^23.0.1",
     "typescript": "^2.9.2"

@@ -1,8 +1,8 @@
-import path from 'path';
 import fs from 'fs-extra';
+import path from 'path';
 
 export default function mergeIntoDirectory(srcPath: string, destPath: string) {
-  fs.readdirSync(srcPath).forEach(function (fileName) {
+  fs.readdirSync(srcPath).forEach((fileName) => {
     const src = path.join(srcPath, fileName);
     const dest = path.join(destPath, fileName);
     let isSame;
@@ -14,7 +14,7 @@ export default function mergeIntoDirectory(srcPath: string, destPath: string) {
       if (fs.existsSync(dest)) {
         const srcContents = fs.readFileSync(src, {encoding: 'utf8'}).replace(/[\n\r]/gm, '');
         const destContents = fs.readFileSync(dest, {encoding: 'utf8'}).replace(/[\n\r]/gm, '');
-        isSame = srcContents == destContents;
+        isSame = srcContents === destContents;
       } else {
         isSame = false;
       }

@@ -1,9 +1,11 @@
+import Debug from 'debug';
 import fs from 'fs-extra';
-import path from 'path';
 import yaml from 'js-yaml';
-const debug = require('debug')('zephyr:load-assignment-config');
+import path from 'path';
 
-export default async function(options: Options, assignmentPath: string): Promise<AssignmentConfig> {
+const debug = Debug('zephyr:load-assignment-config');
+
+export default async function(options: IOptions, assignmentPath: string): Promise<IAssignmentConfig> {
   // Load the assignment-specific YAML config:
   const assignmentYamlPath = path.join(assignmentPath, 'assignment.yaml');
   if (!fs.existsSync(assignmentYamlPath)) {
@@ -18,18 +20,18 @@ export default async function(options: Options, assignmentPath: string): Promise
   }
 
   // Create our assignmentConfig oject:
-  const assignmentConfig: AssignmentConfig = {
+  const assignmentConfig: IAssignmentConfig = {
     baseFilePaths: [],
     studentFiles: [],
     exportFiles: [],
-    assignmentPath: assignmentPath,
+    assignmentPath,
   };
 
   // Import global config options:
   if (assignmentInfo.autograder.base) {
-    const p = path.join(assignmentPath, assignmentInfo.autograder.base);
-    assignmentConfig.baseFilePaths.push(p);
-    debug(`Config added base file path: ${p}`);
+    const basePath = path.join(assignmentPath, assignmentInfo.autograder.base);
+    assignmentConfig.baseFilePaths.push(basePath);
+    debug(`Config added base file path: ${basePath}`);
   }
 
   const p = path.join(assignmentPath, `autograder-${options.run}`);
@@ -48,7 +50,7 @@ export default async function(options: Options, assignmentPath: string): Promise
   if (runConfig.export) {
     assignmentConfig.exportFiles = assignmentConfig.exportFiles.concat( runConfig.export );
   }
-  assignmentConfig.studentFiles = runConfig.studentFiles.map((d: string | StudentFile) => {
+  assignmentConfig.studentFiles = runConfig.studentFiles.map((d: string | IStudentFile) => {
     if (typeof(d) === 'string') {
       return { name: d, required: true };
     } else {
@@ -56,6 +58,5 @@ export default async function(options: Options, assignmentPath: string): Promise
     }
   });
 
-
   return assignmentConfig;
-};
+}
