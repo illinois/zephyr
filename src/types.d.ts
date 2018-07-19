@@ -105,9 +105,9 @@ interface ITestCaseResult {
   stderr?: string;
 }
 
-type GraderProgressEventType = 'start' | 'finish';
+type IGraderProgressEventType = 'start' | 'finish';
 
 interface IGraderProgress {
-  event: GraderProgressEventType;
+  event: IGraderProgressEventType;
   data: any;
 }

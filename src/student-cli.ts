@@ -14,8 +14,8 @@ import processCatchResults from './process-catch-results';
 
 // Top-level async/await hack
 (async () => {
-  const options: GraderOptions = { cwd: '.' };
-  const progressObservable = new Subject<GraderProgress>();
+  const options: IGraderOptions = { cwd: '.' };
+  const progressObservable = new Subject<IGraderProgress>();
 
   // No Ora type was exported, so we have to be a bit hacky
   const typedOra = ora();

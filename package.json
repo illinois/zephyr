@@ -10,7 +10,7 @@
     "test": "jest --coverage",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "fix-lint": "npm run lint -- --fix",
-    "build": "babel src --out-dir lib --verbose --extensions \".js,.ts,.tsx\"",
+    "build": "babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
     "type-check": "tsc --noEmit"
   },

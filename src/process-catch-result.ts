@@ -1,6 +1,6 @@
 import processCatchXML from './process-catch-xml';
 
-export default function(result: TestCaseResult): TestCase {
+export default function(result: ITestCaseResult): ITestCase {
     if (result.tags.make) {
       // Record `make` output:
       return {

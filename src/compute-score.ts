@@ -1,10 +1,10 @@
-export default (results: TestCase[]): Score => {
+export default (results: ITestCase[]): IScore => {
   const score = {
     totalWeight: 0,
     totalEarned: 0,
     extraCredit: 0,
     score: 0,
-  } as Score;
+  } as IScore;
 
   results.forEach((testCase) => {
     score.totalWeight += testCase.weight;

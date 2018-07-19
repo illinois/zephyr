@@ -85,12 +85,12 @@ const fetchTimestampedSha = async (timestamp: string, context: ICheckoutContext)
   return commits.data[0].sha;
 };
 
-export default async (options: CheckoutOptions) => {
+export default async (options: ICheckoutOptions) => {
   const { ref, repoPath, files, checkoutPath, timestamp, ...rest } = options;
   const checkoutContext: ICheckoutContext = {
     octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
-    files: files && files.map((f: StudentFile) => path.join(repoPath, f.name)),
+    files: files && files.map((f: IStudentFile) => path.join(repoPath, f.name)),
     ...rest,
   } as ICheckoutContext;
 

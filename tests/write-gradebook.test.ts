@@ -25,7 +25,7 @@ afterEach(() => {
   mockFsControl.restore();
 });
 
-const makeGradebook = (extra = {}): Gradebook => ({
+const makeGradebook = (extra = {}): IGradebook => ({
   nwalter2: {
     score: 0.7,
     extraCredit: 2,
@@ -53,7 +53,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
+    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\n');
   });
@@ -63,7 +63,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
+    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\nnwalter2,70,,2\n');
   });
@@ -73,7 +73,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
+    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\nnwalter2,70,testing,2\n');
   });
@@ -83,7 +83,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
+    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
     const expected = 'netid,score,error,ec\nnwalter2,70,"could not grade, rip;please try again",2\n';
     expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual(expected);
@@ -94,7 +94,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions();
 
-    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
+    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
     const { __createFileMock } = require('../src/octokit');
     expect(__createFileMock).not.toBeCalled();
@@ -105,7 +105,7 @@ describe('writeGradebook', () => {
     const courseConfig = makeCourseConfig();
     const options = makeOptions({ graded: true });
 
-    await writeGradebook(gradebook, courseConfig as CourseConfig, options as Options);
+    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
     const { __createFileMock } = require('../src/octokit');
     expect(__createFileMock).toBeCalled();

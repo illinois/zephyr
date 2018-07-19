@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import SimpleSchema from 'simpl-schema';
 
 // We'll cache the loaded config here
-let config: CourseConfig | null = null;
+let config: ICourseConfig | null = null;
 
 const makeGithubSchema = (name: string, repo = true): any => {
   const githubSchema = {
@@ -23,7 +23,7 @@ const schema = new SimpleSchema({
   roster: [String],
 });
 
-export default function(): CourseConfig {
+export default function(): ICourseConfig {
   if (!config) {
     if (!fs.existsSync('config.yml')) {
       throw new Error('config.yml not found! Please review Prerequisites.md to get started.');
@@ -35,5 +35,5 @@ export default function(): CourseConfig {
     schema.validate(config);
   }
 
-  return config as CourseConfig;
+  return config as ICourseConfig;
 }

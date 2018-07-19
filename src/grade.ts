@@ -14,7 +14,7 @@ import * as slack from './slack';
 
 const debug = Debug('zephyr:grade');
 
-export default async (options: Options): Promise<StudentGraderResults> => {
+export default async (options: IOptions): Promise<IStudentGraderResults> => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);
 
   // Load configuration for the current course
@@ -65,7 +65,7 @@ export default async (options: Options): Promise<StudentGraderResults> => {
   // Run the autograder
   slack.message(`Grading ${netids.length} submissions.`);
   debug('Running student code...');
-  const autograderResults: StudentGraderResults = {};
+  const autograderResults: IStudentGraderResults = {};
   for (const netid of netids) {
     if (options.resume) {
       const outputFile = path.join(options.outputPath, `${netid}.json`);

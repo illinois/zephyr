@@ -79,7 +79,7 @@ const spawnAsync = async (
 };
 
 export default async (
-  options: GraderOptions,
+  options: IGraderOptions,
   progressObservable?: Subject<IGraderProgress>,
 ): Promise<ITestCaseResult[]> => {
   const { cwd, execCommand = './test' } = options;

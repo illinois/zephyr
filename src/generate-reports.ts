@@ -14,7 +14,7 @@ import writeGradebook from './write-gradebook';
 const studentReportTemplatePath = path.join(__dirname, 'templates', 'student-report.hbs');
 const studentReportTemplate = handlebars.compile(fs.readFileSync(studentReportTemplatePath, 'utf8'));
 
-const generateReportHtml = exports.generateReportHtml = async (result: GraderResult) => {
+const generateReportHtml = exports.generateReportHtml = async (result: IGraderResult) => {
   // If there's any catch data, process it
   if (result.testCaseResults) {
     result.testCases = await processCatch(result.testCaseResults);
@@ -48,12 +48,12 @@ const generateReportHtml = exports.generateReportHtml = async (result: GraderRes
   return studentReportTemplate(output);
 };
 
-export default async function(results: StudentGraderResults, options: Options): Promise<Gradebook> {
+export default async function(results: IStudentGraderResults, options: IOptions): Promise<IGradebook> {
   const studentFeedbackDir = path.join(options.outputPath, 'studentFeedback');
   fs.ensureDirSync(studentFeedbackDir);
   const courseConfig = loadCourseConfig();
 
-  const gradebook: Gradebook = {};
+  const gradebook: IGradebook = {};
   const netids = Object.keys(results);
   for (const netid of netids) {
     const result = results[netid];
