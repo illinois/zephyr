@@ -1,6 +1,8 @@
 /* eslint-env jest */
 import mockFsControl, { mock as fs } from 'jest-plugin-fs';
 import writeGradebook from '../src/write-gradebook';
+import { IGradebook } from '../src/generate-reports';
+import { IScore } from '@illinois/zephyr-catch-grader';
 
 jest.mock('fs', () => require('jest-plugin-fs/mock'));
 jest.mock('../src/octokit', () => {
@@ -33,14 +35,16 @@ const makeGradebook = (extra = {}): IGradebook => ({
   } as IScore,
 });
 
-const makeCourseConfig = () => ({
+// @ts-ignore: I know what I'm doing!
+const makeCourseConfig = (): ICourseConfig => ({
   grades: {
     org: 'cs225',
     repo: 'grades_fa18',
   },
 });
 
-const makeOptions = (extra = {}) => ({
+// @ts-ignore: I know what I'm doing!
+const makeOptions = (extra = {}): IOptions => ({
   outputPath: '/',
   id: 'testing',
   graded: false,

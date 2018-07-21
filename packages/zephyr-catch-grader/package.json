@@ -7,7 +7,7 @@
     "test": "jest --coverage",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "fix-lint": "npm run lint -- --fix",
-    "build": "babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
+    "build": "tsc --emitDeclarationOnly && babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
     "type-check": "tsc --noEmit"
   },
@@ -34,10 +34,12 @@
     "@babel/preset-env": "^7.0.0-beta.54",
     "@babel/preset-typescript": "^7.0.0-beta.54",
     "@types/deasync": "^0.1.0",
+    "@types/jest": "^23.3.0",
     "@types/node": "^10.5.2",
     "@types/validator": "^9.4.1",
     "@types/xml2js": "^0.4.3",
     "jest": "^23.4.1",
+    "jest-plugin-fs": "^2.9.0",
     "ts-jest": "^23.0.1",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"

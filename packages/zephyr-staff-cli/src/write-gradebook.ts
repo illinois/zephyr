@@ -5,6 +5,7 @@ import { promisify } from 'util';
 const debug = Debug('zephyr:output-formatter');
 import csvStringify from 'csv-stringify/lib/sync';
 import octokit from './octokit';
+import { IGradebook } from './generate-reports';
 
 export default async function(gradebook: IGradebook, courseConfig: ICourseConfig, options: IOptions) {
   const csvRows: Array<Array<string|number>> = [];

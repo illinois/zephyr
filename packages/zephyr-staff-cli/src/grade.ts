@@ -6,14 +6,18 @@ import tmp from 'tmp';
 import checkout from '@illinois/zephyr-github-checkout';
 
 import octokit from './octokit';
-import gradeStudent from './grade-student';
+import gradeStudent, { IStudentResult } from './grade-student';
 import loadAssignmentConfig from './load-assignment-config';
 import loadCourseConfig from './load-course-config';
 import * as slack from './slack';
 
 const debug = Debug('zephyr:grade');
 
-export default async (options: IOptions): Promise<IStudentGraderResults> => {
+export interface IStudentResults {
+  [netid: string]: IStudentResult;
+}
+
+export default async (options: IOptions): Promise<IStudentResults> => {
   slack.start(`Starting grading for *${options.assignment}* with config *${options.run}* as \`${options.id}\``);
 
   // Load configuration for the current course
@@ -64,7 +68,7 @@ export default async (options: IOptions): Promise<IStudentGraderResults> => {
   // Run the autograder
   slack.message(`Grading ${netids.length} submissions.`);
   debug('Running student code...');
-  const autograderResults: IStudentGraderResults = {};
+  const autograderResults: IStudentResults = {};
   for (const netid of netids) {
     if (options.resume) {
       const outputFile = path.join(options.outputPath, `${netid}.json`);
@@ -83,9 +87,8 @@ export default async (options: IOptions): Promise<IStudentGraderResults> => {
     fs.writeFileSync(outputFilee, JSON.stringify(result));
     autograderResults[netid] = result;
 
-    const grade = computeScore(result.testCases);
-    if (result.success) {
-      spinner.succeed(`Graded ${netid}: ${(grade.score * 100).toFixed(2)}%`);
+    if (result.success && result.results) {
+      spinner.succeed(`Graded ${netid}: ${(result.results.score * 100).toFixed(2)}%`);
     } else {
       spinner.fail(`Could not grade submission from ${netid}`);
     }

@@ -8,7 +8,7 @@ import os from 'os';
 import path from 'path';
 import yargs from 'yargs';
 import generateReports from './generate-reports';
-import grade from './grade';
+import grade, { IStudentResults } from './grade';
 import * as slack from './slack';
 
 dotenv.load();
@@ -132,7 +132,7 @@ fs.ensureDirSync(argv.outputPath);
 
 // Top-level async/await hack
 (async () => {
-  const results = await grade(argv);
+  const results: IStudentResults = await grade(argv);
   await generateReports(results, argv);
 })().catch((e) => {
   console.error(e);

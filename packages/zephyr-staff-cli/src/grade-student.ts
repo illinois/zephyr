@@ -4,22 +4,31 @@ import fs from 'fs-extra';
 import path from 'path';
 import tmp from 'tmp';
 import checkout, { ICheckoutOptions } from '@illinois/zephyr-github-checkout';
-import grader from '@illinois/zephyr-catch-grader';
+import grader, { IGraderResults } from '@illinois/zephyr-catch-grader';
 
 import octokit from './octokit';
 import loadCourseConfig from './load-course-config';
 import mergeIntoDirectory from './merge-into-directory';
 import * as slack from './slack';
 
+export interface IStudentResult {
+  netid: string;
+  timestamp: string;
+  success: boolean;
+  sha?: string;
+  errors?: string[];
+  results: IGraderResults;
+}
+
 export default async (
   options: IOptions,
   assignmentConfig: IAssignmentConfig,
   netid: string,
-): Promise<IGraderResult> => {
-  const result: IGraderResult = {
+): Promise<IStudentResult> => {
+  const result: IStudentResult = {
     netid,
     timestamp: options.timestamp,
-  } as IGraderResult;
+  } as IStudentResult;
 
   // Create a temp folder to place all grader files into
   const tempPathObj = tmp.dirSync({ unsafeCleanup: options.cleanup });
@@ -60,9 +69,8 @@ export default async (
 
   // Time to run some tests
   debug(`> Grading started: ${netid}`);
-  let testCaseResults: ITestCaseResult[] = [];
   try {
-    testCaseResults = await grader({ cwd: tempPath });
+    result.results = await grader({ cwd: tempPath });
   } catch (e) {
     debug(`> Grading errored: ${netid}`);
     slack.warning(`Unable to grade submission from ${netid}!`, JSON.stringify(e));
@@ -82,9 +90,6 @@ export default async (
       debug(`Exported file: ${exportSavePath}`);
     }
   });
-
-  result.success = true;
-  result.testCaseResults = testCaseResults;
 
   if (options.cleanup) {
     tempPathObj.removeCallback();
