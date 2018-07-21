@@ -4,6 +4,7 @@ import processCatchResult from './process-catch-result';
 import computeScore, { IScore } from './compute-score';
 
 export { IScore } from './compute-score';
+export { IGraderOptions, IGraderProgress, IGraderProgressEventType } from './grader';
 
 export interface IGraderResults {
   score: IScore;

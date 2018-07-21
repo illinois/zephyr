@@ -2,17 +2,14 @@
 
 import 'babel-polyfill';
 
-import grader from '@illinois/zephyr-catch-grader';
+import grader, { IGraderOptions, IGraderProgress } from '@illinois/zephyr-catch-grader';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 
-import computeScore from './compute-score';
 import { indentWithString } from './indent-string';
-import processCatchResult from './process-catch-result';
-import processCatchResults from './process-catch-results';
 
 // Top-level async/await hack
 (async () => {
@@ -34,7 +31,7 @@ import processCatchResults from './process-catch-results';
 
   progressObservable.pipe(
     filter((p) => p.event === 'finish'),
-    map((p) => processCatchResult(p.data)),
+    map((p) => p.data),
   ).subscribe((data) => {
     if (spinner) {
       const spinnerMethod = data.success ? spinner.succeed : spinner.fail;
@@ -47,9 +44,7 @@ import processCatchResults from './process-catch-results';
     }
   });
 
-  const results = await grader(options, progressObservable);
-  const processedResults = await processCatchResults(results);
-  const score = computeScore(processedResults);
+  const { score } = await grader(options, progressObservable);
   const percentScore = (score.score * 100).toFixed(2);
   console.log();
   console.log(`Score: ${score.totalEarned}/${score.totalWeight} (${percentScore}%)`);

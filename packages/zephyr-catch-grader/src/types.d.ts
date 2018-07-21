@@ -1,3 +1,15 @@
+interface IGraderOptions {
+  cwd: string;
+  execCommand?: string;
+}
+
+interface ITestCaseInfo {
+  name: string;
+  tags: {
+    [name: string]: any;
+  };
+}
+
 interface ITestCase {
   name: string;
   tags: {
@@ -9,11 +21,6 @@ interface ITestCase {
   extraCredit?: number;
   output?: string;
   message?: string;
-}
-
-interface IGraderOptions {
-  cwd: string;
-  execCommand?: string;
 }
 
 interface ITestCaseResult {
@@ -33,4 +40,14 @@ type IGraderProgressEventType = 'start' | 'finish';
 interface IGraderProgress {
   event: IGraderProgressEventType;
   data: any;
+}
+
+interface IGraderProgressStart extends IGraderProgress {
+  event: 'start';
+  data: ITestCaseInfo;
+}
+
+interface IGraderProgressFinish extends IGraderProgress {
+  event: 'finish';
+  data: ITestCaseResult;
 }

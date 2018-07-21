@@ -1,6 +1,18 @@
 import { ChildProcess, spawn, SpawnSyncOptions } from 'child_process';
 import { Subject } from 'rxjs';
 
+export interface IGraderOptions {
+  cwd: string;
+  execCommand?: string;
+}
+
+export type IGraderProgressEventType = 'start' | 'finish';
+
+export interface IGraderProgress {
+  event: IGraderProgressEventType;
+  data: any;
+}
+
 type SpawnError = {
   code: string,
 } | Error;
@@ -16,11 +28,6 @@ interface ISpawnResult {
 
 interface ITestCaseTags {
   [name: string]: any;
-}
-
-interface ITestCase {
-  name: string;
-  tags: ITestCaseTags;
 }
 
 // Wraps `spawn` in a Promise to allow us to use async/await
@@ -84,7 +91,27 @@ export default async (
 ): Promise<ITestCaseResult[]> => {
   const { cwd, execCommand = './test' } = options;
   const results: ITestCaseResult[] = [];
-  const recordResult = (testCase: ITestCase, p: ISpawnResult) => {
+
+  // Helper functions scoped to this particular run
+  const notifyStart = (testCase: ITestCaseInfo) => {
+    if (progressObservable) {
+      progressObservable.next({
+        event: 'start',
+        data: testCase,
+      } as IGraderProgressStart);
+    }
+  }
+
+  const notifyFinish = (result: ITestCaseResult) => {
+    if (progressObservable) {
+      progressObservable.next({
+        event: 'finish',
+        data: result,
+      } as IGraderProgressFinish);
+    }
+  }
+
+  const recordResult = (testCase: ITestCaseInfo, p: ISpawnResult) => {
     const result: ITestCaseResult = {
       exitCode: p.status,
       signal: p.signal,
@@ -106,17 +133,15 @@ export default async (
     }
 
     results.push(result);
-    if (progressObservable) {
-      progressObservable.next({
-        event: 'finish',
-        data: result,
-      });
-    }
+    notifyFinish(result);
   };
 
+
+
   // Run `make`
+  notifyStart({ name: 'make', tags: { make: true }});
   const makeProcess = await spawnAsync('make', [execCommand], { cwd });
-  recordResult({name: 'make', tags: {make: true}}, makeProcess);
+  recordResult({ name: 'make', tags: { make: true }}, makeProcess);
 
   // Only continue if `make` was successful
   if (makeProcess.status === 0) {
@@ -125,7 +150,7 @@ export default async (
     const catchListOutputLines = tagsProcess.stdout.toString().split('\n');
     catchListOutputLines.pop();  // Remove blank entry at end
 
-    const testCases: ITestCase[] = [];
+    const testCases: ITestCaseInfo[] = [];
     for (const catchListOutputLine of catchListOutputLines) {
       // Test case name:
       const testCaseName = catchListOutputLine.trim().replace(/,/g, '\\,');
