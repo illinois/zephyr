@@ -1,6 +1,6 @@
 # zephyr
 
-> A grading platform for student code.
+> A unified grading platform for student code.
 
 ## About Zephyr
 
