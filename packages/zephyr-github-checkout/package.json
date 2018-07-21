@@ -1,9 +1,9 @@
 {
   "name": "@illinois/zephyr-github-checkout",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Module to do efficient checkouts using GitHub's API",
   "main": "./lib/index.js",
-  "files":[
+  "files": [
     "./lib"
   ],
   "scripts": {
