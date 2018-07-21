@@ -5,6 +5,7 @@ export default function(result: ITestCaseResult): ITestCase {
       // Record `make` output:
       return {
         name: 'Output from `make`',
+        tags: result.tags,
         success: (result.exitCode === 0),
         weight: 0,
         earned: 0,
@@ -15,6 +16,7 @@ export default function(result: ITestCaseResult): ITestCase {
       // Record `valgrind` output:
       return {
         name: result.name,
+        tags: result.tags,
         success: (result.exitCode === 0),
         weight: result.tags.weight,
         earned: (result.exitCode === 0) ? result.tags.weight : 0,
@@ -33,6 +35,7 @@ export default function(result: ITestCaseResult): ITestCase {
 
       return {
         name: result.name,
+        tags: result.tags,
         success: false,
         weight: result.tags.weight,
         earned: 0,

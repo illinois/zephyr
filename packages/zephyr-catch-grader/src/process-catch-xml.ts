@@ -18,6 +18,7 @@ export default (result: ITestCaseResult): ITestCase => {
     console.error(e);
     return {
       name: result.name,
+      tags: result.tags,
       success: false,
       weight: result.tags.weight,
       earned: 0,
@@ -28,6 +29,7 @@ export default (result: ITestCaseResult): ITestCase => {
   if (!catchJSON.Catch.Group[0].TestCase) {
     return {
       name: result.name,
+      tags: result.tags,
       success: false,
       weight: result.tags.weight,
       earned: 0,
@@ -68,6 +70,7 @@ export default (result: ITestCaseResult): ITestCase => {
   // Complete test case
   return {
     name: result.name,
+    tags: result.tags,
     success,
     weight: result.tags.weight,
     earned: (success) ? result.tags.weight : 0,

@@ -3,13 +3,12 @@ import fs from 'fs-extra';
 import ora from 'ora';
 import path from 'path';
 import tmp from 'tmp';
+import checkout from '@illinois/zephyr-github-checkout';
 
-import checkout from './checkout';
-import computeScore from './compute-score';
+import octokit from './octokit';
 import gradeStudent from './grade-student';
 import loadAssignmentConfig from './load-assignment-config';
 import loadCourseConfig from './load-course-config';
-import processCatchResults from './process-catch-results';
 import * as slack from './slack';
 
 const debug = Debug('zephyr:grade');
@@ -31,10 +30,11 @@ export default async (options: IOptions): Promise<IStudentGraderResults> => {
     assignmentTmpDir = tmp.dirSync({ unsafeCleanup: options.cleanup });
     assignmentDir = assignmentTmpDir.name;
     await checkout({
+      octokit: octokit(),
+      repo: courseConfig.assignments.repo,
+      owner: courseConfig.assignments.owner,
       checkoutPath: assignmentDir,
       repoPath: options.assignment,
-      owner: courseConfig.assignments.owner,
-      repo: courseConfig.assignments.repo,
     });
     spinner.succeed();
   }
@@ -78,7 +78,6 @@ export default async (options: IOptions): Promise<IStudentGraderResults> => {
     const spinner = ora(`Grading submission from ${netid}`).start();
 
     const result = await gradeStudent(options, assignmentConfig, netid);
-    result.testCases = await processCatchResults(result.testCaseResults);
 
     const outputFilee = path.join(options.outputPath, `${netid}.json`);
     fs.writeFileSync(outputFilee, JSON.stringify(result));

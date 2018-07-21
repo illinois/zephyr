@@ -1,18 +1,33 @@
-import Github from '@octokit/rest';
+import Octokit from '@octokit/rest';
 import Debug from 'debug';
 import fs from 'fs-extra';
 import moment from 'moment';
 import path from 'path';
 import rp from 'request-promise-native';
-import Octokit from './octokit';
 
 const debug = Debug('zephyr:checkout');
+
+export interface ICheckoutOptions {
+  octokit: Octokit;
+  owner: string;
+  repo: string;
+  repoPath: string;
+  checkoutPath: string;
+  files?: IFile[];
+  ref?: string;
+  timestamp?: string;
+}
+
+export interface IFile {
+  name: string;
+  required:boolean;
+}
 
 interface ICheckoutContext {
   owner: string;
   repo: string;
   ref: string;
-  octokit: Github;
+  octokit: Octokit;
   files?: string[];
 }
 
@@ -86,19 +101,16 @@ const fetchTimestampedSha = async (timestamp: string, context: ICheckoutContext)
 };
 
 export default async (options: ICheckoutOptions) => {
-  const { ref, repoPath, files, checkoutPath, timestamp, ...rest } = options;
+  const { repoPath, files, checkoutPath, timestamp, ...rest } = options;
   const checkoutContext: ICheckoutContext = {
-    octokit: Octokit(),
     // If files were specified, we need to transform them to be prefixed with the repo path
-    files: files && files.map((f: IStudentFile) => path.join(repoPath, f.name)),
+    files: files && files.map((f: IFile) => path.join(repoPath, f.name)),
     ...rest,
   } as ICheckoutContext;
 
-  if (ref) {
-    checkoutContext.ref = ref;
-  } else if (timestamp) {
+  if (timestamp) {
     checkoutContext.ref = await fetchTimestampedSha(timestamp, checkoutContext);
-  } else {
+  } else if (!options.ref) {
     // Even if a timestamp isn't specified, we should still pin all requests to
     // a specific commit so that we don't have a condition where someone
     // pushes code in the middle of a checkout process

@@ -3,9 +3,10 @@ const debug = Debug('zephyr:grade-student');
 import fs from 'fs-extra';
 import path from 'path';
 import tmp from 'tmp';
+import checkout, { ICheckoutOptions } from '@illinois/zephyr-github-checkout';
+import grader from '@illinois/zephyr-catch-grader';
 
-import checkout from './checkout';
-import grader from './grader';
+import octokit from './octokit';
 import loadCourseConfig from './load-course-config';
 import mergeIntoDirectory from './merge-into-directory';
 import * as slack from './slack';
@@ -30,7 +31,8 @@ export default async (
   debug(`Fetching student files to ${tempStudentFiles.name}`);
   const courseConfig = loadCourseConfig();
   try {
-    const checkoutOptions = {
+    const checkoutOptions: ICheckoutOptions = {
+      octokit: octokit(),
       repo: netid,
       repoPath: options.assignment,
       files: assignmentConfig.studentFiles,

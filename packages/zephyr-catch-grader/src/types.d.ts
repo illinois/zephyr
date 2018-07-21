@@ -1,5 +1,8 @@
 interface ITestCase {
   name: string;
+  tags: {
+    [name: string]: any;
+  };
   success: boolean;
   weight: number;
   earned: number;
