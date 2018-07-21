@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A Zephyr grader for a Catch test suite",
   "main": "./lib/index.js",
+  "files":[
+    "./lib"
+  ],
   "scripts": {
     "test": "jest --coverage",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",

@@ -5,13 +5,17 @@
   "bin": {
     "zephyr": "./lib/index.js"
   },
+  "files":[
+    "./lib"
+  ],
   "scripts": {
     "test": "jest --coverage",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "fix-lint": "npm run lint -- --fix",
     "build": "babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "keywords": [
     "illinois",
