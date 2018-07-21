@@ -1,8 +1,7 @@
 {
-  "name": "@illinois/zephyr-catch-grader",
-  "version": "1.0.0",
-  "description": "A Zephyr grader for a Catch test suite",
-  "main": "./lib/index.js",
+  "name": "@illinois/zephyr",
+  "private": true,
+  "description": "A unified grading platform for student code",
   "scripts": {
     "test": "lerna run test",
     "build": "lerna run build",
@@ -18,5 +17,8 @@
     "autograder"
   ],
   "author": "Nathan Walters",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "lerna": "^2.11.0"
+  }
 }
