@@ -94,5 +94,7 @@ export default async (
   if (options.cleanup) {
     tempPathObj.removeCallback();
   }
+
+  result.success = true;
   return result;
 };

@@ -39,12 +39,10 @@ const generateReportHtml = exports.generateReportHtml = async (result: IStudentR
     output.succeeded = true;
     const { totalWeight, totalEarned, extraCredit, score } = result.results.score;
 
-    output.score = {
-      totalWeight,
-      totalEarned,
-      extraCredit,
-      score: (score * 100).toFixed(2),
-    };
+    output.earnedWeight = output.points = totalEarned;
+    output.totalWeight = output.max_points = totalWeight;
+    output.extraCredit = extraCredit;
+    output.score = (score * 100).toFixed(2);
   }
 
   return studentReportTemplate(output);
