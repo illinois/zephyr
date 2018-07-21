@@ -59,7 +59,7 @@ describe('writeGradebook', () => {
 
     await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
-    expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\n');
+    expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,ec\n');
   });
 
   it('writes a gradebook without errors', async () => {
@@ -69,28 +69,7 @@ describe('writeGradebook', () => {
 
     await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
 
-    expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\nnwalter2,70,,2\n');
-  });
-
-  it('writes a gradebook with simple error', async () => {
-    const gradebook = makeGradebook({ errors: ['testing'] });
-    const courseConfig = makeCourseConfig();
-    const options = makeOptions();
-
-    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
-
-    expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,error,ec\nnwalter2,70,testing,2\n');
-  });
-
-  it('writes a gradebook with complex errors', async () => {
-    const gradebook = makeGradebook({ errors: ['could not grade, rip', 'please try again'] });
-    const courseConfig = makeCourseConfig();
-    const options = makeOptions();
-
-    await writeGradebook(gradebook, courseConfig as ICourseConfig, options as IOptions);
-
-    const expected = 'netid,score,error,ec\nnwalter2,70,"could not grade, rip;please try again",2\n';
-    expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual(expected);
+    expect(fs.readFileSync('/testing.csv', 'utf8')).toEqual('netid,score,ec\nnwalter2,70.00,2\n');
   });
 
   it('does not upload to GitHub if this is not a graded run', async () => {

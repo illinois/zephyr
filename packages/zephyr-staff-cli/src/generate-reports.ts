@@ -63,15 +63,15 @@ export default async function(results: IStudentResults, options: IOptions): Prom
     const html = await generateReportHtml(result);
 
     // Store file to disk
-    debug(`Saving student report: ${  path.join( studentFeedbackDir, `${netid  }.html` )}`);
-    fs.writeFileSync( path.join( studentFeedbackDir, `${netid  }.html` ), html );
+    debug(`Saving student report: ${path.join( studentFeedbackDir, `${netid}.html` )}`);
+    fs.writeFileSync( path.join( studentFeedbackDir, `${netid}.html` ), html );
 
     // Store file on git (graded runs)
     if (options.graded) {
       await Octokit().repos.createFile({
         owner: courseConfig.feedback.owner as string,
         repo: courseConfig.feedback.repo as string,
-        path: path.join(options.id, `${netid  }.html`),
+        path: path.join(options.id, `${netid}.html`),
         message: 'autograder generated feedback file',
         content: Buffer.from(html).toString('base64'),
       });
@@ -82,7 +82,8 @@ export default async function(results: IStudentResults, options: IOptions): Prom
       score = {
         totalWeight: 0,
         totalEarned: 0,
-        errors: result.errors,
+        extraCredit: 0,
+        score: 0,
       }
     }
 
