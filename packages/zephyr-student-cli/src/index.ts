@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 import 'babel-polyfill';
+
+import grader from '@illinois/zephyr-catch-grader';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+
 import computeScore from './compute-score';
-import grader from './grader';
 import { indentWithString } from './indent-string';
 import processCatchResult from './process-catch-result';
 import processCatchResults from './process-catch-results';
