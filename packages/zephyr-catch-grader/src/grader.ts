@@ -136,8 +136,6 @@ export default async (
     notifyFinish(result);
   };
 
-
-
   // Run `make`
   notifyStart({ name: 'make', tags: { make: true }});
   const makeProcess = await spawnAsync('make', [execCommand], { cwd });
