@@ -6,7 +6,7 @@
     "zephyr": "./lib/index.js"
   },
   "files": [
-    "./lib"
+    "lib"
   ],
   "scripts": {
     "test": "echo \"TODO: add tests\" && true",

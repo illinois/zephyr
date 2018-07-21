@@ -4,7 +4,7 @@
   "description": "A Zephyr grader for a Catch test suite",
   "main": "./lib/index.js",
   "files": [
-    "./lib"
+    "lib"
   ],
   "scripts": {
     "test": "jest --coverage",

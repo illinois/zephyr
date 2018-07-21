@@ -6,7 +6,7 @@
     "zephyr-staff": "./lib/index.js"
   },
   "files": [
-    "./lib"
+    "lib"
   ],
   "scripts": {
     "test": "jest --coverage",
