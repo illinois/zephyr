@@ -1,10 +1,18 @@
 import { Subject } from 'rxjs';
-import grader from './grader';
+import grader, { IGraderOptions, IGraderProgress, ITestCase } from './grader';
 import processCatchResult from './process-catch-result';
 import computeScore, { IScore } from './compute-score';
 
 export { IScore } from './compute-score';
-export { IGraderOptions, IGraderProgress, IGraderProgressEventType } from './grader';
+export {
+  IGraderOptions,
+  ITestCase,
+  ITestCaseResult,
+  IGraderProgress,
+  IGraderProgressEventType,
+  IGraderProgressStart,
+  IGraderProgressFinish
+} from './grader';
 
 export interface IGraderResults {
   score: IScore;

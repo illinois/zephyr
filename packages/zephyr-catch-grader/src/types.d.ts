@@ -1,4 +1,4 @@
-interface IGraderOptions {
+/*interface IGraderOptions {
   cwd: string;
   execCommand?: string;
 }
@@ -42,12 +42,4 @@ interface IGraderProgress {
   data: any;
 }
 
-interface IGraderProgressStart extends IGraderProgress {
-  event: 'start';
-  data: ITestCaseInfo;
-}
-
-interface IGraderProgressFinish extends IGraderProgress {
-  event: 'finish';
-  data: ITestCaseResult;
-}
+*/

@@ -3,6 +3,8 @@ import { parseString } from 'xml2js';
 const xml2js = deasync(parseString);
 import validator from 'validator';
 
+import { ITestCase, ITestCaseResult } from './grader';
+
 function formatExpression(json: any) {
   const original = json[0].Original[0].trim();
   const expanded = json[0].Expanded[0].trim();

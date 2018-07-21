@@ -2,7 +2,7 @@
 
 import 'babel-polyfill';
 
-import grader, { IGraderOptions, IGraderProgress } from '@illinois/zephyr-catch-grader';
+import grader, { IGraderOptions, IGraderProgress, IGraderProgressFinish, ITestCase, IGraderProgressStart, processCatchResult } from '@illinois/zephyr-catch-grader';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Subject } from 'rxjs';
@@ -20,18 +20,18 @@ import { indentWithString } from './indent-string';
   const typedOra = ora();
   let spinner: typeof typedOra;
 
-  progressObservable.pipe(
+  progressObservable.pipe<string>(
     filter((p) => p.event === 'start'),
-    map((p) => p.data.name),
+    map((p: IGraderProgressStart) => p.data.name),
   ).subscribe((name) => {
     spinner = ora(name).start();
   });
 
   const indent = indentWithString('  > ');
 
-  progressObservable.pipe(
+  progressObservable.pipe<ITestCase>(
     filter((p) => p.event === 'finish'),
-    map((p) => p.data),
+    map((p: IGraderProgressFinish) => processCatchResult(p.data)),
   ).subscribe((data) => {
     if (spinner) {
       const spinnerMethod = data.success ? spinner.succeed : spinner.fail;

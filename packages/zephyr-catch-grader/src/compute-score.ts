@@ -1,3 +1,5 @@
+import { ITestCase } from './grader';
+
 export interface IScore {
   totalWeight: number;
   totalEarned: number;

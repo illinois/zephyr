@@ -1,4 +1,5 @@
 import processCatchXML from './process-catch-xml';
+import { ITestCase, ITestCaseResult } from './grader';
 
 export default function(result: ITestCaseResult): ITestCase {
     if (result.tags.make) {

@@ -6,11 +6,53 @@ export interface IGraderOptions {
   execCommand?: string;
 }
 
+export interface ITestCaseInfo {
+  name: string;
+  tags: {
+    [name: string]: any;
+  };
+}
+
+export interface ITestCase {
+  name: string;
+  tags: {
+    [name: string]: any;
+  };
+  success: boolean;
+  weight: number;
+  earned: number;
+  extraCredit?: number;
+  output?: string;
+  message?: string;
+}
+
+export interface ITestCaseResult {
+  name: string;
+  tags: {
+    [name: string]: any;
+  };
+  exitCode?: number | null;
+  signal?: string;
+  error?: any;
+  stdout?: string;
+  stderr?: string;
+}
+
 export type IGraderProgressEventType = 'start' | 'finish';
 
 export interface IGraderProgress {
   event: IGraderProgressEventType;
   data: any;
+}
+
+export interface IGraderProgressStart extends IGraderProgress {
+  event: 'start';
+  data: ITestCaseInfo;
+}
+
+export interface IGraderProgressFinish extends IGraderProgress {
+  event: 'finish';
+  data: ITestCaseResult;
 }
 
 type SpawnError = {
