@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 
-import { indentWithString } from './indent-string';
+import { indentWithString, indentWithPad } from './indent-string';
 
 // Top-level async/await hack
 (async () => {
@@ -27,7 +27,8 @@ import { indentWithString } from './indent-string';
     spinner = ora(name).start();
   });
 
-  const indent = indentWithString('  > ');
+  const indent2 = indentWithPad(2);
+  const indent4 = indentWithPad(4);
 
   progressObservable.pipe<ITestCase>(
     filter((p) => p.event === 'finish'),
@@ -38,8 +39,15 @@ import { indentWithString } from './indent-string';
       const color = data.success ? chalk.green : chalk.red;
       spinnerMethod.call(spinner, color(`[${data.earned}/${data.weight}] ${data.name}`));
 
-      if (!data.success && data.output) {
-        console.error(indent(data.output));
+      if (!data.success) {
+        if (data.output) {
+          console.error(indent2(chalk.bold('Output')))
+          console.error(indent4(data.output));
+        }
+        if (data.message) {
+          console.error(indent2(chalk.bold('Message')))
+          console.error(indent4(data.message));
+        }
       }
     }
   });
@@ -51,7 +59,7 @@ import { indentWithString } from './indent-string';
 
   if (score.totalEarned !== score.totalWeight) {
     console.log();
-    console.log(chalk.bold('Please run the Catch tests directly for more detailed info on failing tests!'));
+    console.log(`Please run ${chalk.bold('make test')} and ${chalk.bold('test')} directly for more detailed info!`);
   }
 })().catch((e) => {
   console.error(e);
