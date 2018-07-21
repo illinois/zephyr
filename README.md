@@ -70,7 +70,7 @@ The staff CLI is a much more full-featured application. It has the following cap
 * Collect files for export
 * Process results into student reports and a gradebook CSV
 
-#### Other platforms
+### Other platforms
 
 As mentioned above, Zephyr will support more grading platforms in the future.
 
