@@ -1,4 +1,3 @@
-import deasync from 'deasync';
 import XML from 'pixl-xml';
 import validator from 'validator';
 

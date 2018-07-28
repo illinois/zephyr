@@ -1,2 +1,12 @@
+# Blacklist all the things
+*
+
+# Whitelist only what we want
+!packages/
+!lerna.json
+!package.json
+!package-lock.json
+
+# We don't want these in the build context
 **/node_modules/
 **/lib/

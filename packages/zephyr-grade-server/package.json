@@ -5,11 +5,12 @@
   "main": "./lib/index.js",
   "scripts": {
     "start": "micro",
+    "start:webpack": "micro ./dist/main.js",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "fix-lint": "npm run lint -- --fix",
     "build": "tsc --emitDeclarationOnly && babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
-    "build:docker": "docker -l debug build ../../ -t nwalters512/zephyr-grade-server -f Dockerfile.build",
+    "build:docker": "docker build ../../ -t nwalters512/zephyr-grade-server -f ../../Dockerfile",
     "type-check": "tsc --noEmit",
     "prepublishOnly": "npm run test && npm run build"
   },
@@ -34,6 +35,7 @@
     "@types/tmp": "0.0.33",
     "jest": "^23.4.1",
     "jest-plugin-fs": "^2.9.0",
+    "pkg": "^4.3.3",
     "ts-jest": "^23.0.1",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"
@@ -49,7 +51,9 @@
     "fs-extra": "^7.0.0",
     "js-yaml": "^3.12.0",
     "micro": "^9.3.2",
-    "tmp": "^0.0.33"
+    "tmp": "^0.0.33",
+    "webpack": "^4.16.3",
+    "webpack-cli": "^3.1.0"
   },
   "jest": {
     "transform": {

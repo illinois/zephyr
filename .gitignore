@@ -65,3 +65,6 @@ lib/
 
 # autograder results
 out/
+
+# macos pls
+.DS_store
