@@ -2,6 +2,7 @@
 import { readFileSync } from 'fs-extra';
 import path from 'path';
 import processCatchXml from '../src/process-catch-xml';
+import { ITestCase, ITestCaseResult } from '../src/grader';
 
 const NAME = 'process-catch-xml-test';
 

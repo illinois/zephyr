@@ -2,7 +2,7 @@
 import MergeTrees from 'merge-trees';
 import path from 'path';
 import { withDir } from 'tmp-promise';
-import grader from '../src/grader';
+import grader, { ITestCaseResult } from '../src/grader';
 
 const TEST_TIMEOUT = 15000; // 15 seconds
 

@@ -1,6 +1,5 @@
 import deasync from 'deasync';
-import { parseString } from 'xml2js';
-const xml2js = deasync(parseString);
+import XML from 'pixl-xml';
 import validator from 'validator';
 
 import { ITestCase, ITestCaseResult } from './grader';
@@ -15,9 +14,12 @@ export default (result: ITestCaseResult): ITestCase => {
   const xml = result.stdout;
   let catchJSON;
   try {
-    catchJSON = xml2js(xml);
+    catchJSON = XML.parse(xml as string, {
+      forceArrays: true,
+      preserveDocumentNode: true,
+      preserveAttributes: true,
+    });
   } catch (e) {
-    console.error(e);
     return {
       name: result.name,
       tags: result.tags,
@@ -40,17 +42,17 @@ export default (result: ITestCaseResult): ITestCase => {
   }
 
   // Find success/failure
-  const success = validator.toBoolean(catchJSON.Catch.Group[0].TestCase[0].OverallResult[0].$.success);
+  const success = validator.toBoolean(catchJSON.Catch.Group[0].TestCase[0].OverallResult[0]._Attribs.success);
   let output = '';
   if (!success) {
     if (catchJSON.Catch.Group[0].TestCase[0].FatalErrorCondition) {
-      const error = catchJSON.Catch.Group[0].TestCase[0].FatalErrorCondition[0]._.trim();
+      const error = catchJSON.Catch.Group[0].TestCase[0].FatalErrorCondition[0]._Data.trim();
       output = `Fatal Error: ${error}`;
     } else if ( catchJSON.Catch.Group[0].TestCase[0].Exception ) {
-      const error = catchJSON.Catch.Group[0].TestCase[0].Exception[0]._.trim();
+      const error = catchJSON.Catch.Group[0].TestCase[0].Exception[0]._Data.trim();
       output = `Exception: ${error}`;
     } else if ( catchJSON.Catch.Group[0].TestCase[0].Failure ) {
-      const error = catchJSON.Catch.Group[0].TestCase[0].Failure[0]._.trim();
+      const error = catchJSON.Catch.Group[0].TestCase[0].Failure[0]._Data.trim();
       output = `FAIL: ${error}`;
     } else if (catchJSON.Catch.Group[0].TestCase[0].Section) {
       catchJSON.Catch.Group[0].TestCase[0].Section.forEach((section: any) => {
