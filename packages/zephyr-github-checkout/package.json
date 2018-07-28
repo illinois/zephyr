@@ -20,7 +20,7 @@
     "autograder"
   ],
   "author": "Nathan Walters",
-  "license": "MIT",
+  "license": "NCSA",
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.54",
     "@babel/core": "^7.0.0-beta.54",
