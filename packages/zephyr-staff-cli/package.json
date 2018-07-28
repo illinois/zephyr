@@ -22,7 +22,7 @@
     "autograder"
   ],
   "author": "Nathan Walters",
-  "license": "MIT",
+  "license": "NCSA",
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.54",
     "@illinois/zephyr-catch-grader": "^1.0.3",

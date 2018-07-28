@@ -17,7 +17,7 @@
     "autograder"
   ],
   "author": "Nathan Walters",
-  "license": "MIT",
+  "license": "NCSA",
   "devDependencies": {
     "lerna": "^2.11.0"
   }
