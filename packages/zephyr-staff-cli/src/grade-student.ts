@@ -7,7 +7,7 @@ import checkout, { ICheckoutOptions } from '@illinois/zephyr-github-checkout';
 import grader, { IGraderResults } from '@illinois/zephyr-catch-grader';
 
 import octokit from './octokit';
-import loadCourseConfig from './load-course-config';
+import { ICourseConfig } from './load-course-config';
 import mergeIntoDirectory from './merge-into-directory';
 import * as slack from './slack';
 import { IAssignmentConfig } from './load-assignment-config';
@@ -22,8 +22,17 @@ export interface IStudentResult {
   results: IGraderResults;
 }
 
+export interface IGradeStudentOptions {
+  cleanup: boolean;
+  timestamp: string;
+  assignment: string;
+  ref: string | undefined;
+  outputPath: string;
+}
+
 export default async (
-  options: IOptions,
+  options: IGradeStudentOptions,
+  courseConfig: ICourseConfig,
   assignmentConfig: IAssignmentConfig,
   netid: string,
 ): Promise<IStudentResult> => {
@@ -40,7 +49,6 @@ export default async (
   // Fetch student files from GitHub
   const tempStudentFiles = tmp.dirSync({ unsafeCleanup: false });
   debug(`Fetching student files to ${tempStudentFiles.name}`);
-  const courseConfig = loadCourseConfig();
   try {
     const checkoutOptions: ICheckoutOptions = {
       octokit: octokit(),
@@ -88,7 +96,8 @@ export default async (
     exportSavePath = path.join(exportSavePath, `${netid}-${exportFileName}`);
 
     if (fs.existsSync(exportFilePath)) {
-      fs.copyFileSync(exportFilePath, exportSavePath);
+      // fs.copyFileSync only available on node 8.5.0+
+      fs.writeFileSync(exportSavePath, fs.readFileSync(exportFilePath));
       debug(`Exported file: ${exportSavePath}`);
     }
   });

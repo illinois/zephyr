@@ -59,7 +59,7 @@ export default async (options: IOptions): Promise<IStudentResults> => {
     netids = courseConfig.roster;
 
     // --run-one option, selecting a random student:
-    if (options['run-one']) {
+    if (options.runOne) {
       const index = Math.floor( Math.random() * netids.length );
       netids = [ netids[index] ] ;
       console.log(`--run-one selected a random student: ${netids[0]}`);
@@ -82,7 +82,7 @@ export default async (options: IOptions): Promise<IStudentResults> => {
 
     const spinner = ora(`Grading submission from ${netid}`).start();
 
-    const result = await gradeStudent(options, assignmentConfig, netid);
+    const result = await gradeStudent(options, courseConfig, assignmentConfig, netid);
 
     const outputFilee = path.join(options.outputPath, `${netid}.json`);
     fs.writeFileSync(outputFilee, JSON.stringify(result, undefined, 2));

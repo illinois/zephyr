@@ -1,0 +1,11 @@
+{
+  "type": "docker",
+  "features": {
+    "cloud": "v2"
+  },
+  "limits": {
+    "maxConcurrentReqs": 10,
+    "duration": 300000,
+    "timeout": 60000
+  }
+}

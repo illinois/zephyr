@@ -7,6 +7,7 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import yargs from 'yargs';
+import remote from './remote';
 import generateReports from './generate-reports';
 import grade, { IStudentResults } from './grade';
 import * as slack from './slack';
@@ -22,8 +23,8 @@ export interface IOptions {
   assignmentRoot: string;
   cleanup: boolean;
   netid?: string;
-  ['run-one']: boolean;
-  ['skip-ews-check']: boolean;
+  runOne: boolean;
+  skipEwsCheck: boolean;
   resume: boolean;
   outputPath: string;
   timestamp: string;
@@ -86,6 +87,9 @@ const argv = yargs
     boolean: true,
     default: false,
   })
+  .option('remote', {
+    describe: 'Execute grading jobs on remote zephyr-grade-server workers',
+  })
   .implies('graded', 'id')
   .implies('ref', 'netid')
   .help()
@@ -105,52 +109,57 @@ if (!process.env.GHE_TOKEN) {
   fatal('You must provide a GitHub token via the GHE_TOKEN environment variable');
 }
 
-if (!argv['skip-ews-check'] && (process.platform !== 'linux' || !os.hostname().includes('ews.illinois.edu'))) {
-  fatal('You should be running the grader in an EWS Linux machine for '
-        + 'actual grading.\n'
-        + 'Even testing should be done on EWS, but if needed locally, '
-        + 'use --skip-ews-check.');
-}
-
-if (argv.cleanup === undefined) {
-  if (argv.netid || argv['run-one']) {
-    debug('--cleanup is not set; defaulting to --cleanup false since --netid or --run-one is used');
-    argv.cleanup = false;
-  } else {
-    debug('--cleanup is not set; defaulting to --cleanup true');
-    argv.cleanup = true;
+if (argv.remote) {
+  remote(argv);
+} else {
+  if (!argv['skip-ews-check'] && (process.platform !== 'linux' || !os.hostname().includes('ews.illinois.edu'))) {
+    fatal('You should be running the grader in an EWS Linux machine for '
+          + 'actual grading.\n'
+          + 'Even testing should be done on EWS, but if needed locally, '
+          + 'use --skip-ews-check.');
   }
+
+  if (argv.cleanup === undefined) {
+    if (argv.netid || argv['run-one']) {
+      debug('--cleanup is not set; defaulting to --cleanup false since --netid or --run-one is used');
+      argv.cleanup = false;
+    } else {
+      debug('--cleanup is not set; defaulting to --cleanup true');
+      argv.cleanup = true;
+    }
+  }
+
+  // graded
+  if (argv.graded) {
+    console.log(' ============================================================================= ');
+    console.log(' = This is a GRADED run -- feedback will be reported to students at the end. = ');
+    console.log(' ============================================================================= ');
+    console.log(` * Assignment: ${argv.assignment}`);
+    console.log(` * Run: ${argv.run}`);
+    console.log();
+
+    slack.enable();
+  }
+
+  // ensure id exists
+  if (!argv.id) {
+    argv.id = `${argv.assignment}_${(new Date()).getTime()}`;
+  }
+  debug(`Run ID: ${argv.id}`);
+
+  // output path
+  if (!argv.outputPath) {
+    argv.outputPath = path.join('out', argv.id);
+  }
+  fs.ensureDirSync(argv.outputPath);
+
+  // Top-level async/await hack
+  (async () => {
+    const results: IStudentResults = await grade(argv);
+    await generateReports(results, argv);
+  })().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 }
 
-// graded
-if (argv.graded) {
-  console.log(' ============================================================================= ');
-  console.log(' = This is a GRADED run -- feedback will be reported to students at the end. = ');
-  console.log(' ============================================================================= ');
-  console.log(` * Assignment: ${argv.assignment}`);
-  console.log(` * Run: ${argv.run}`);
-  console.log();
-
-  slack.enable();
-}
-
-// ensure id exists
-if (!argv.id) {
-  argv.id = `${argv.assignment}_${(new Date()).getTime()}`;
-}
-debug(`Run ID: ${argv.id}`);
-
-// output path
-if (!argv.outputPath) {
-  argv.outputPath = path.join('out', argv.id);
-}
-fs.ensureDirSync(argv.outputPath);
-
-// Top-level async/await hack
-(async () => {
-  const results: IStudentResults = await grade(argv);
-  await generateReports(results, argv);
-})().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
