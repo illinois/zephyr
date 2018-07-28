@@ -10,6 +10,7 @@ import gradeStudent, { IStudentResult } from './grade-student';
 import loadAssignmentConfig from './load-assignment-config';
 import loadCourseConfig from './load-course-config';
 import * as slack from './slack';
+import { IOptions } from './index';
 
 const debug = Debug('zephyr:grade');
 

@@ -11,6 +11,7 @@ import Octokit from './octokit';
 import writeGradebook from './write-gradebook';
 import { IStudentResults } from './grade';
 import { IStudentResult } from './grade-student';
+import { IOptions } from './index';
 
 const studentReportTemplatePath = path.join(__dirname, 'templates', 'student-report.hbs');
 const studentReportTemplate = handlebars.compile(fs.readFileSync(studentReportTemplatePath, 'utf8'));

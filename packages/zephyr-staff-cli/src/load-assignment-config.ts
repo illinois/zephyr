@@ -2,8 +2,21 @@ import Debug from 'debug';
 import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import path from 'path';
+import { IOptions } from './index';
 
 const debug = Debug('zephyr:load-assignment-config');
+
+export interface IStudentFile {
+  name: string;
+  required: boolean;
+}
+
+export interface IAssignmentConfig {
+  studentFiles: IStudentFile[];
+  baseFilePaths: string[];
+  exportFiles: string[];
+  assignmentPath: string;
+}
 
 export default async function(options: IOptions, assignmentPath: string): Promise<IAssignmentConfig> {
   // Load the assignment-specific YAML config:

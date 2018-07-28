@@ -2,6 +2,23 @@ import fs from 'fs-extra';
 import yaml from 'js-yaml';
 import SimpleSchema from 'simpl-schema';
 
+export interface IGithubConfig {
+  host: string;
+  owner: string;
+}
+
+export interface IRepoConfig extends IGithubConfig {
+  repo: string;
+}
+
+export interface ICourseConfig {
+  assignments: IRepoConfig;
+  submissions: IGithubConfig;
+  grades: IRepoConfig;
+  feedback: IRepoConfig;
+  roster: string[];
+}
+
 // We'll cache the loaded config here
 let config: ICourseConfig | null = null;
 

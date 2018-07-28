@@ -6,6 +6,8 @@ const debug = Debug('zephyr:output-formatter');
 import csvStringify from 'csv-stringify/lib/sync';
 import octokit from './octokit';
 import { IGradebook } from './generate-reports';
+import { IOptions } from './index';
+import { ICourseConfig } from './load-course-config';
 
 export default async function(gradebook: IGradebook, courseConfig: ICourseConfig, options: IOptions) {
   const csvRows: Array<Array<string|number>> = [];

@@ -1,15 +1,10 @@
 {
-  "name": "@illinois/zephyr-staff-cli",
-  "version": "1.0.3",
-  "description": "A CLI for zephyr for use by course staff",
-  "bin": {
-    "zephyr-staff": "./lib/index.js"
-  },
-  "files": [
-    "lib"
-  ],
+  "name": "@illinois/zephyr-grade-server",
+  "version": "1.0.0",
+  "description": "A microservice to grade student code from HTTP requests",
+  "main": "./lib/index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "start": "micro",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "fix-lint": "npm run lint -- --fix",
     "build": "tsc --emitDeclarationOnly && babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
@@ -22,23 +17,7 @@
     "autograder"
   ],
   "author": "Nathan Walters",
-  "license": "MIT",
-  "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.54",
-    "@illinois/zephyr-catch-grader": "^1.0.3",
-    "@illinois/zephyr-github-checkout": "^1.0.3",
-    "@octokit/rest": "^15.9.4",
-    "babel-polyfill": "^6.26.0",
-    "csv-stringify": "^3.1.1",
-    "dotenv": "^6.0.0",
-    "handlebars": "^4.0.11",
-    "js-yaml": "^3.12.0",
-    "moment": "^2.22.2",
-    "ora": "^3.0.0",
-    "simpl-schema": "^1.5.0",
-    "tmp": "^0.0.33",
-    "yargs": "^12.0.1"
-  },
+  "license": "NCSA",
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.54",
     "@babel/core": "^7.0.0-beta.54",
@@ -47,21 +26,21 @@
     "@babel/plugin-transform-runtime": "^7.0.0-beta.54",
     "@babel/preset-env": "^7.0.0-beta.54",
     "@babel/preset-typescript": "^7.0.0-beta.54",
-    "@types/debug": "0.0.30",
-    "@types/dotenv": "^4.0.3",
-    "@types/fs-extra": "^5.0.4",
-    "@types/handlebars": "^4.0.38",
-    "@types/jest": "^23.3.0",
-    "@types/js-yaml": "^3.11.2",
-    "@types/ora": "^1.3.4",
-    "@types/request-promise-native": "^1.0.15",
-    "@types/tmp": "0.0.33",
-    "@types/yargs": "^11.1.1",
+    "@types/node": "^10.5.4",
     "jest": "^23.4.1",
     "jest-plugin-fs": "^2.9.0",
     "ts-jest": "^23.0.1",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.54",
+    "@illinois/zephyr-catch-grader": "^1.0.3",
+    "@illinois/zephyr-staff-cli": "^1.0.3",
+    "@octokit/rest": "^15.9.4",
+    "babel-polyfill": "^6.26.0",
+    "debug": "^3.1.0",
+    "micro": "^9.3.2"
   },
   "jest": {
     "transform": {

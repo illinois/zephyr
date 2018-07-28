@@ -14,6 +14,22 @@ import * as slack from './slack';
 dotenv.load();
 const debug = Debug('zephyr:staff-cli');
 
+export interface IOptions {
+  graded: boolean;
+  assignment: string;
+  run: string;
+  id: string;
+  assignmentRoot: string;
+  cleanup: boolean;
+  netid?: string;
+  ['run-one']: boolean;
+  ['skip-ews-check']: boolean;
+  resume: boolean;
+  outputPath: string;
+  timestamp: string;
+  ref: string;
+}
+
 const argv = yargs
   .option('assignment', {
     describe: 'Assignment name',

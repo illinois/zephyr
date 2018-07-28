@@ -10,6 +10,8 @@ import octokit from './octokit';
 import loadCourseConfig from './load-course-config';
 import mergeIntoDirectory from './merge-into-directory';
 import * as slack from './slack';
+import { IAssignmentConfig } from './load-assignment-config';
+import { IOptions } from '.';
 
 export interface IStudentResult {
   netid: string;
