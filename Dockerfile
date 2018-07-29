@@ -6,6 +6,11 @@ RUN npm run build && cd packages/zephyr-grade-server && npx pkg -t node10-alpine
 
 FROM alpine:latest
 ENV IN_DOCKER=true
+RUN \
+  # Add edge repos
+  echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories && \
+  echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories && \
+  echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
 WORKDIR /app/
 COPY --from=builder /build/packages/zephyr-grade-server/zephyr-pkg .
 CMD ./zephyr-pkg
