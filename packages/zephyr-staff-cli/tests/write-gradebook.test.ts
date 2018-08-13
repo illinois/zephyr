@@ -2,7 +2,7 @@
 import mockFsControl, { mock as fs } from 'jest-plugin-fs';
 import writeGradebook from '../src/write-gradebook';
 import { IGradebook } from '../src/generate-reports';
-import { IScore } from '@illinois/zephyr-catch-grader';
+import { IScore } from '@illinois/zephyr-grader-base';
 
 jest.mock('fs', () => require('jest-plugin-fs/mock'));
 jest.mock('../src/octokit', () => {

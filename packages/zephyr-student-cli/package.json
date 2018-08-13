@@ -26,6 +26,7 @@
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.54",
     "@illinois/zephyr-catch-grader": "^1.0.3",
+    "@illinois/zephyr-grader-base": "^1.0.0",
     "babel-polyfill": "^6.26.0",
     "ora": "^3.0.0",
     "rxjs": "^6.2.2"

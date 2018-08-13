@@ -1,7 +1,8 @@
+import { ITestCaseResult } from '@illinois/zephyr-grader-base';
+import { ICatchTestCaseResult } from './grader';
 import processCatchXML from './process-catch-xml';
-import { ITestCase, ITestCaseResult } from './grader';
 
-export default function(result: ITestCaseResult): ITestCase {
+export default function(result: ICatchTestCaseResult): ITestCaseResult {
     if (result.tags.make) {
       // Record `make` output:
       return {

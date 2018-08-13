@@ -1,5 +1,7 @@
 /* eslint-env jest */
 import { readFileSync } from 'fs-extra';
+import { ITestCaseResult } from '@illinois/zephyr-grader-base';
+import { ICatchTestCaseResult } from '../src/grader';
 import path from 'path';
 import processCatchXml from '../src/process-catch-xml';
 
@@ -16,7 +18,7 @@ const makeResult = (xml: string) => ({
   stdout: xml,
 });
 
-const checkFailedResult = (result: ITestCase) => {
+const checkFailedResult = (result: ITestCaseResult) => {
   expect(result.name).toEqual(NAME);
   expect(result.success).toEqual(false);
   expect(result.weight).toEqual(1);
@@ -26,7 +28,7 @@ const checkFailedResult = (result: ITestCase) => {
 describe('process-catch-results', () => {
   it('parses a successful result', async () => {
     const xml = loadFixture('successful');
-    const result = await processCatchXml(makeResult(xml) as ITestCaseResult);
+    const result = await processCatchXml(makeResult(xml) as ICatchTestCaseResult);
     expect(result.name).toEqual(NAME);
     expect(result.success).toEqual(true);
     expect(result.weight).toEqual(1);

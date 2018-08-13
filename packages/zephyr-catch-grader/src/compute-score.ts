@@ -1,13 +1,6 @@
-import { ITestCase } from './grader';
+import { IScore, ITestCaseResult } from '@illinois/zephyr-grader-base';
 
-export interface IScore {
-  totalWeight: number;
-  totalEarned: number;
-  extraCredit: number;
-  score: number;
-}
-
-export default (results: ITestCase[]): IScore => {
+export default (results: ITestCaseResult[]): IScore => {
     const score = {
       totalWeight: 0,
       totalEarned: 0,

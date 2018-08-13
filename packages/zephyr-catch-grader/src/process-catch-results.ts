@@ -1,6 +1,7 @@
+import { ITestCaseResult } from '@illinois/zephyr-grader-base';
+import { ICatchTestCaseResult } from './grader';
 import processCatchResult from './process-catch-result';
-import { ITestCase, ITestCaseResult } from './grader';
 
-export default async function(results: ITestCaseResult[]): Promise<ITestCase[]> {
+export default async function(results: ICatchTestCaseResult[]): Promise<ITestCaseResult[]> {
   return await Promise.all(results.map(processCatchResult));
 }

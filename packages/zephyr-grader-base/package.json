@@ -1,0 +1,32 @@
+{
+  "name": "@illinois/zephyr-grader-base",
+  "version": "1.0.0",
+  "description": "Defines shared types and interfaces for Zephyr graders",
+  "main": "./lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "format": "prettier --no-config --write 'src/**/*.ts'",
+    "build": "tsc --emitDeclarationOnly && babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
+    "build:watch": "npm run build -- --watch",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "author": "Nick Magerko",
+  "license": "NCSA",
+  "dependencies": {
+    "rxjs": "^6.2.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-rc.1",
+    "@babel/core": "^7.0.0-rc.1",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-rc.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
+    "@babel/plugin-transform-runtime": "^7.0.0-rc.1",
+    "@babel/preset-env": "^7.0.0-rc.1",
+    "@babel/preset-typescript": "^7.0.0-rc.1",
+    "prettier": "^1.14.2",
+    "typescript": "^3.0.1"
+  }
+}

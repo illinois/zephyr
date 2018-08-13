@@ -1,32 +1,10 @@
+import { 
+  IGraderOptions, IGraderProgress, IGraderProgressStart, IGraderProgressFinish, ITestCaseInfo 
+} from '@illinois/zephyr-grader-base';
 import { ChildProcess, spawn, SpawnSyncOptions } from 'child_process';
 import { Subject } from 'rxjs';
 
-export interface IGraderOptions {
-  cwd: string;
-  execCommand?: string;
-}
-
-export interface ITestCaseInfo {
-  name: string;
-  tags: {
-    [name: string]: any;
-  };
-}
-
-export interface ITestCase {
-  name: string;
-  tags: {
-    [name: string]: any;
-  };
-  success: boolean;
-  weight: number;
-  earned: number;
-  extraCredit?: number;
-  output?: string;
-  message?: string;
-}
-
-export interface ITestCaseResult {
+export interface ICatchTestCaseResult {
   name: string;
   tags: {
     [name: string]: any;
@@ -38,21 +16,8 @@ export interface ITestCaseResult {
   stderr?: string;
 }
 
-export type IGraderProgressEventType = 'start' | 'finish';
-
-export interface IGraderProgress {
-  event: IGraderProgressEventType;
-  data: any;
-}
-
-export interface IGraderProgressStart extends IGraderProgress {
-  event: 'start';
-  data: ITestCaseInfo;
-}
-
-export interface IGraderProgressFinish extends IGraderProgress {
-  event: 'finish';
-  data: ITestCaseResult;
+interface ITestCaseTags {
+  [name: string]: any;
 }
 
 type SpawnError = {
@@ -66,10 +31,6 @@ interface ISpawnResult {
   status: number | null;
   signal?: string | null;
   error?: SpawnError;
-}
-
-interface ITestCaseTags {
-  [name: string]: any;
 }
 
 // Wraps `spawn` in a Promise to allow us to use async/await
@@ -130,9 +91,9 @@ const spawnAsync = async (
 export default async (
   options: IGraderOptions,
   progressObservable?: Subject<IGraderProgress>,
-): Promise<ITestCaseResult[]> => {
+): Promise<ICatchTestCaseResult[]> => {
   const { cwd, execCommand = './test' } = options;
-  const results: ITestCaseResult[] = [];
+  const results: ICatchTestCaseResult[] = [];
 
   // Helper functions scoped to this particular run
   const notifyStart = (testCase: ITestCaseInfo) => {
@@ -144,7 +105,7 @@ export default async (
     }
   }
 
-  const notifyFinish = (result: ITestCaseResult) => {
+  const notifyFinish = (result: ICatchTestCaseResult) => {
     if (progressObservable) {
       progressObservable.next({
         event: 'finish',
@@ -154,13 +115,13 @@ export default async (
   }
 
   const recordResult = (testCase: ITestCaseInfo, p: ISpawnResult) => {
-    const result: ITestCaseResult = {
+    const result: ICatchTestCaseResult = {
       exitCode: p.status,
       signal: p.signal,
       error: p.error,
       name: testCase.name,
       tags: testCase.tags,
-    } as ITestCaseResult;
+    } as ICatchTestCaseResult;
 
     try {
       result.stdout = p.stdout.toString().substring(0, 10 * 1024);

@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import tmp from 'tmp';
 import checkout, { ICheckoutOptions } from '@illinois/zephyr-github-checkout';
-import grader, { IGraderResults } from '@illinois/zephyr-catch-grader';
+import grader, { IGraderResults } from '@illinois/zephyr-grader-base';
 
 import octokit from './octokit';
 import loadCourseConfig from './load-course-config';
