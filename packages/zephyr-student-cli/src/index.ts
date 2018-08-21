@@ -2,14 +2,17 @@
 
 import 'babel-polyfill';
 
-import grader, { IGraderOptions, IGraderProgress, IGraderProgressFinish, ITestCase, IGraderProgressStart, processCatchResult } from '@illinois/zephyr-catch-grader';
+import grader, { processCatchResult } from '@illinois/zephyr-catch-grader';
+import { 
+  IGraderOptions, IGraderProgress, IGraderProgressStart, IGraderProgressFinish, ITestCaseResult 
+} from '@illinois/zephyr-grader-base';
 import chalk from 'chalk';
 import ora from 'ora';
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 
-import { indentWithString, indentWithPad } from './indent-string';
+import { indentWithPad } from './indent-string';
 
 // Top-level async/await hack
 (async () => {
@@ -30,7 +33,7 @@ import { indentWithString, indentWithPad } from './indent-string';
   const indent2 = indentWithPad(2);
   const indent4 = indentWithPad(4);
 
-  progressObservable.pipe<ITestCase>(
+  progressObservable.pipe<ITestCaseResult>(
     filter((p) => p.event === 'finish'),
     map((p: IGraderProgressFinish) => processCatchResult(p.data)),
   ).subscribe((data) => {

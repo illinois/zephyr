@@ -4,7 +4,7 @@ import moment from 'moment';
 import path from 'path';
 const debug = Debug('zephyr:output-formatter');
 import handlebars from 'handlebars';
-import { IScore } from '@illinois/zephyr-catch-grader';
+import { IScore } from '@illinois/zephyr-grader-base';
 
 import loadCourseConfig from './load-course-config';
 import Octokit from './octokit';

@@ -2,13 +2,13 @@
 import MergeTrees from 'merge-trees';
 import path from 'path';
 import { withDir } from 'tmp-promise';
-import grader from '../src/grader';
+import grader, { ICatchTestCaseResult } from '../src/grader';
 
 const TEST_TIMEOUT = 15000; // 15 seconds
 
 const getFixtureDirectory = (name: string) => path.join(__dirname, '__fixtures__', 'grader', name);
 
-const withTestFixture = (name: string, fn: (results: ITestCaseResult[]) => any) => {
+const withTestFixture = (name: string, fn: (results: ICatchTestCaseResult[]) => any) => {
   return withDir(async ({ path: destPath }) => {
     const mergeTrees = new MergeTrees(
       [getFixtureDirectory('base'), getFixtureDirectory(name)],

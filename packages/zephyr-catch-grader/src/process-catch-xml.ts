@@ -3,7 +3,8 @@ import { parseString } from 'xml2js';
 const xml2js = deasync(parseString);
 import validator from 'validator';
 
-import { ITestCase, ITestCaseResult } from './grader';
+import { ITestCaseResult } from '@illinois/zephyr-grader-base';
+import { ICatchTestCaseResult } from './grader';
 
 function formatExpression(json: any) {
   const original = json[0].Original[0].trim();
@@ -11,7 +12,7 @@ function formatExpression(json: any) {
   return `Original: ${original}\nExpanded: ${expanded}`;
 }
 
-export default (result: ITestCaseResult): ITestCase => {
+export default (result: ICatchTestCaseResult): ITestCaseResult => {
   const xml = result.stdout;
   let catchJSON;
   try {

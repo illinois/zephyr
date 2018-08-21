@@ -1,23 +1,10 @@
+import { IGraderOptions, IGraderProgress, IGraderResults } from '@illinois/zephyr-grader-base';
 import { Subject } from 'rxjs';
-import grader, { IGraderOptions, IGraderProgress, ITestCase } from './grader';
+import grader from './grader';
 import processCatchResult from './process-catch-result';
-import computeScore, { IScore } from './compute-score';
+import computeScore from './compute-score';
 
-export { IScore } from './compute-score';
-export {
-  IGraderOptions,
-  ITestCase,
-  ITestCaseResult,
-  IGraderProgress,
-  IGraderProgressEventType,
-  IGraderProgressStart,
-  IGraderProgressFinish
-} from './grader';
-
-export interface IGraderResults {
-  score: IScore;
-  tests: ITestCase[];
-}
+export { ICatchTestCaseResult } from './grader';
 
 // This is just a helpful utility to both grade and process the results at the same time
 export default async (
