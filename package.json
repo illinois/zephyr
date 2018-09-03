@@ -19,6 +19,6 @@
   "author": "Nathan Walters",
   "license": "NCSA",
   "devDependencies": {
-    "lerna": "^2.11.0"
+    "lerna": "^3.2.1"
   }
 }
