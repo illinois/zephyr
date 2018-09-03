@@ -1,0 +1,15 @@
+# Blacklist all the things
+*
+
+# Whitelist only what we want
+!packages/
+!lerna.json
+!package.json
+!package-lock.json
+
+# We don't want these in the build context
+**/node_modules/
+**/lib/
+
+# We'll exclude these so that changing a Dockerfile doesn't invalidate the cached layers
+**/Dockerfile

@@ -1,0 +1,62 @@
+{
+  "name": "@illinois/zephyr-catch-prairielearn-grader",
+  "private": true,
+  "version": "1.0.3",
+  "description": "A Zephyr grader for PrairieLearn that executes Catch test cases",
+  "main": "./lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "jest --coverage",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "fix-lint": "npm run lint -- --fix",
+    "build": "tsc --emitDeclarationOnly && babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
+    "build:watch": "npm run build -- --watch",
+    "build:docker": "docker build -f Dockerfile -t illinois/zephyr-catch-prairielearn-grader ../../",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "illinois",
+    "zephyr",
+    "autograder"
+  ],
+  "author": "Nathan Walters",
+  "license": "NCSA",
+  "dependencies": {
+    "@babel/runtime": "^7.0.0-beta.54",
+    "@illinois/zephyr-catch-grader": "^1.0.3",
+    "babel-polyfill": "^6.26.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.54",
+    "@babel/core": "^7.0.0-beta.54",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.54",
+    "@babel/plugin-transform-runtime": "^7.0.0-beta.54",
+    "@babel/preset-env": "^7.0.0-beta.54",
+    "@babel/preset-typescript": "^7.0.0-beta.54",
+    "@types/fs-extra": "^5.0.4",
+    "@types/jest": "^23.3.0",
+    "@types/node": "^10.5.2",
+    "jest": "^23.4.1",
+    "jest-plugin-fs": "^2.9.0",
+    "ts-jest": "^23.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

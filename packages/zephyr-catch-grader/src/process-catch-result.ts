@@ -11,8 +11,7 @@ export default function(result: ICatchTestCaseResult): ITestCaseResult {
         success: (result.exitCode === 0),
         weight: 0,
         earned: 0,
-        output: result.stdout,
-        message: result.stderr,
+        output: result.output,
       };
     } else if (result.tags.valgrind) {
       // Record `valgrind` output:
@@ -22,8 +21,7 @@ export default function(result: ICatchTestCaseResult): ITestCaseResult {
         success: (result.exitCode === 0),
         weight: result.tags.weight,
         earned: (result.exitCode === 0) ? result.tags.weight : 0,
-        output: result.stdout,
-        message: result.stderr,
+        output: result.output,
       };
     } else if (result.error) {
       let error;
@@ -41,8 +39,7 @@ export default function(result: ICatchTestCaseResult): ITestCaseResult {
         success: false,
         weight: result.tags.weight,
         earned: 0,
-        output: error,
-        message: result.stderr,
+        message: error,
       };
 
     } else {

@@ -86,7 +86,7 @@ const fetchMasterSha = async (context: ICheckoutContext) => {
     repo: context.repo,
     ref: 'heads/master',
   });
-  return res.data.object.sha;
+  return res.data.object.sha as string;
 };
 
 const fetchTimestampedSha = async (timestamp: string, context: ICheckoutContext) => {
@@ -97,7 +97,7 @@ const fetchTimestampedSha = async (timestamp: string, context: ICheckoutContext)
     until: moment(timestamp).toISOString(),
   });
 
-  return commits.data[0].sha;
+  return commits.data[0].sha as string;
 };
 
 export default async (options: ICheckoutOptions) => {

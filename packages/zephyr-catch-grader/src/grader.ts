@@ -14,6 +14,7 @@ export interface ICatchTestCaseResult {
   error?: any;
   stdout?: string;
   stderr?: string;
+  output?: string;
 }
 
 interface ITestCaseTags {
@@ -28,6 +29,7 @@ interface ISpawnResult {
   pid: number;
   stdout: string;
   stderr: string;
+  output: string;
   status: number | null;
   signal?: string | null;
   error?: SpawnError;
@@ -47,7 +49,7 @@ const spawnAsync = async (
 ): Promise<ISpawnResult> => {
   const opts = options || {};
   const maxBuffer = opts.maxBuffer || 200 * 1024; // Default for spawnSync
-  const killSignal = opts.killSignal || 'SIGTERM'; // Default for spawnSync
+  const killSignal: string = opts.killSignal as string || 'SIGTERM'; // Default for spawnSync
   let error: SpawnError | undefined;
 
   return new Promise<ISpawnResult>((resolve) => {
@@ -62,27 +64,32 @@ const spawnAsync = async (
     }
     let stdout = '';
     let stderr = '';
+    let output = '';
     if (child.stdout) {
       child.stdout.on('data', (data) => {
         stdout += data;
+        output += data;
         if (stdout.length > maxBuffer) { killChild('ENOBUFS')(); }
+        if (output.length > maxBuffer) { killChild('ENOBUFS')(); }
       });
     }
     if (child.stderr) {
       child.stderr.on('data', (data) => {
         stderr += data;
+        output += data;
         if (stderr.length > maxBuffer) { killChild('ENOBUFS')(); }
+        if (output.length > maxBuffer) { killChild('ENOBUFS')(); }
       });
     }
     child.on('close', (code, signal) => {
       child.removeAllListeners();
       if (timeoutId) { clearTimeout(timeoutId); }
-      resolve({ pid: child.pid, stdout, stderr, status: code, signal, error });
+      resolve({ pid: child.pid, stdout, stderr, output, status: code, signal, error });
     });
     child.on('error', (childError) => {
       child.removeAllListeners();
       if (timeoutId) { clearTimeout(timeoutId); }
-      const result = { pid: child.pid, stdout, stderr, status: null, signal: null, error: childError } as ISpawnResult;
+      const result = { pid: child.pid, stdout, stderr, output, status: null, signal: null, error: childError };
       resolve(result);
     });
   });
@@ -133,6 +140,12 @@ export default async (
       result.stderr = p.stderr.toString().substring(0, 10 * 1024);
     } catch (e) {
       result.stderr = '[Process timed out.]';
+    }
+
+    try {
+      result.output = p.output.toString().substring(0, 10 * 1024);
+    } catch (e) {
+      result.output = '[Process timed out.]';
     }
 
     results.push(result);
