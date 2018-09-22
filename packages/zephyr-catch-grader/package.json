@@ -12,7 +12,8 @@
     "fix-lint": "npm run lint -- --fix",
     "build": "tsc --emitDeclarationOnly && babel src --out-dir lib --copy-files --verbose --extensions \".js,.ts,.tsx\"",
     "build:watch": "npm run build -- --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run test && npm run build"
   },
   "keywords": [
     "illinois",
