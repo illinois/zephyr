@@ -14,17 +14,6 @@ export default function(result: ICatchTestCaseResult): ITestCaseResult {
         output: result.stdout,
         message: result.stderr,
       };
-    } else if (result.tags.valgrind) {
-      // Record `valgrind` output:
-      return {
-        name: result.name,
-        tags: result.tags,
-        success: (result.exitCode === 0),
-        weight: result.tags.weight,
-        earned: (result.exitCode === 0) ? result.tags.weight : 0,
-        output: result.stdout,
-        message: result.stderr,
-      };
     } else if (result.error) {
       let error;
       if (result.error.code === 'ETIMEDOUT') {
@@ -42,9 +31,17 @@ export default function(result: ICatchTestCaseResult): ITestCaseResult {
         weight: result.tags.weight,
         earned: 0,
         output: error,
-        message: result.stderr,
       };
-
+    } else if (result.tags.valgrind) {
+      // Record `valgrind` output:
+      return {
+        name: result.name,
+        tags: result.tags,
+        success: (result.exitCode === 0),
+        weight: result.tags.weight,
+        earned: (result.exitCode === 0) ? result.tags.weight : 0,
+        output: result.stderr,
+      };
     } else {
       const testCase = processCatchXML(result);
       if (testCase) {
