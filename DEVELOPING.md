@@ -11,7 +11,7 @@ You can globally install the CLI packages to use them as you would if you global
 
 ```sh
 cd packages/zephyr-staff-cli
-npm i -g @illinois/zephyr-staff-cli
+npm i -g
 ```
 
-This will symlink `zephyr-staff` from your global npm `bin` directory to the compiled output in this repo. You can now use `zephyr-staff` as normal. It should **not** be necessary to run this command aver every change.
+This will symlink `zephyr-staff` from your global npm `bin` directory to the compiled output in this repo. You can now use `zephyr-staff` as normal. It should **not** be necessary to run this command after every change.
