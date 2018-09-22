@@ -1,6 +1,6 @@
 {
   "name": "@illinois/zephyr-staff-cli",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "A CLI for zephyr for use by course staff",
   "bin": {
     "zephyr-staff": "./lib/index.js"
@@ -24,10 +24,10 @@
   "author": "Nathan Walters",
   "license": "NCSA",
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.54",
-    "@illinois/zephyr-catch-grader": "^1.0.3",
-    "@illinois/zephyr-github-checkout": "^1.0.3",
-    "@illinois/zephyr-grader-base": "^1.0.0",
+    "@babel/runtime": "^7.0.0",
+    "@illinois/zephyr-catch-grader": "^1.0.5",
+    "@illinois/zephyr-github-checkout": "^1.0.5",
+    "@illinois/zephyr-grader-base": "^1.0.5",
     "@octokit/rest": "^15.9.4",
     "babel-polyfill": "^6.26.0",
     "csv-stringify": "^3.1.1",
@@ -41,13 +41,13 @@
     "yargs": "^12.0.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.54",
-    "@babel/core": "^7.0.0-beta.54",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.54",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.54",
-    "@babel/plugin-transform-runtime": "^7.0.0-beta.54",
-    "@babel/preset-env": "^7.0.0-beta.54",
-    "@babel/preset-typescript": "^7.0.0-beta.54",
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-typescript": "^7.1.0",
     "@types/debug": "0.0.30",
     "@types/dotenv": "^4.0.3",
     "@types/fs-extra": "^5.0.4",

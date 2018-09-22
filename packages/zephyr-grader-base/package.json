@@ -1,6 +1,6 @@
 {
   "name": "@illinois/zephyr-grader-base",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Defines shared types and interfaces for Zephyr graders",
   "main": "./lib/index.js",
   "files": [
@@ -19,13 +19,13 @@
     "rxjs": "^6.2.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-rc.1",
-    "@babel/core": "^7.0.0-rc.1",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-rc.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
-    "@babel/plugin-transform-runtime": "^7.0.0-rc.1",
-    "@babel/preset-env": "^7.0.0-rc.1",
-    "@babel/preset-typescript": "^7.0.0-rc.1",
+    "@babel/cli": "^7.1.0",
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-typescript": "^7.1.0",
     "prettier": "^1.14.2",
     "typescript": "^3.0.1"
   }
