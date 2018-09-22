@@ -1,6 +1,6 @@
 {
   "name": "@illinois/zephyr-grader-base",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Defines shared types and interfaces for Zephyr graders",
   "main": "./lib/index.js",
   "files": [
