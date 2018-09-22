@@ -1,6 +1,6 @@
 {
   "name": "@illinois/zephyr-catch-grader",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A Zephyr grader for a Catch test suite",
   "main": "./lib/index.js",
   "files": [
@@ -24,7 +24,7 @@
   "license": "NCSA",
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@illinois/zephyr-grader-base": "^1.0.5",
+    "@illinois/zephyr-grader-base": "^1.0.6",
     "babel-polyfill": "^6.26.0",
     "deasync": "^0.1.13",
     "rxjs": "^6.2.2",

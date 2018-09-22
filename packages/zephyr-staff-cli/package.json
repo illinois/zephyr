@@ -1,6 +1,6 @@
 {
   "name": "@illinois/zephyr-staff-cli",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A CLI for zephyr for use by course staff",
   "bin": {
     "zephyr-staff": "./lib/index.js"
@@ -25,9 +25,9 @@
   "license": "NCSA",
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "@illinois/zephyr-catch-grader": "^1.0.5",
-    "@illinois/zephyr-github-checkout": "^1.0.5",
-    "@illinois/zephyr-grader-base": "^1.0.5",
+    "@illinois/zephyr-catch-grader": "^1.0.6",
+    "@illinois/zephyr-github-checkout": "^1.0.6",
+    "@illinois/zephyr-grader-base": "^1.0.6",
     "@octokit/rest": "^15.9.4",
     "babel-polyfill": "^6.26.0",
     "csv-stringify": "^3.1.1",
