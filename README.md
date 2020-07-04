@@ -74,6 +74,6 @@ The staff CLI is a much more full-featured application. It has the following cap
 
 As mentioned above, Zephyr will support more grading platforms in the future.
 
-PrairieLearn grades code inside a Docker container. It will be esay to build a light wrapper around the core grader that moves files around and provides the correct directory to the grader, and then writes the results in the format that PrairieLearn expects.
+PrairieLearn grades code inside a Docker container. It will be easy to build a light wrapper around the core grader that moves files around and provides the correct directory to the grader, and then writes the results in the format that PrairieLearn expects.
 
 Broadway, our upcoming department-wide grading job execution platform, will also grade code inside of containers. Much, if not all, of the code from PrairieLearn will be able to be reused here, including the base Docker image.
